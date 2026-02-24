@@ -6,8 +6,10 @@ import ToolBar from '@/components/ToolBar.vue'
 import ReaderContext from '@/components/ReaderContext.vue'
 import ResultsPane from '@/components/ResultsPane.vue'
 import SettingsModal from '@/components/SettingsModal.vue'
+import { useAutoRun } from '@/composables/useAutoRun'
 
 const showSettings = ref(false)
+useAutoRun()
 </script>
 
 <template>
