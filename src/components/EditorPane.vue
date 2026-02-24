@@ -6,7 +6,7 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useDocumentStore } from '@/stores/document'
 import { EditorState } from '@codemirror/state'
-import { EditorView, lineWrapping } from '@codemirror/view'
+import { EditorView } from '@codemirror/view'
 import { markdown } from '@codemirror/lang-markdown'
 
 const editorRef = ref<HTMLDivElement>()
@@ -54,7 +54,7 @@ onMounted(() => {
     doc: documentStore.content,
     extensions: [
       markdown(),
-      lineWrapping,
+      EditorView.lineWrapping,
       theme,
       updateListener,
     ],

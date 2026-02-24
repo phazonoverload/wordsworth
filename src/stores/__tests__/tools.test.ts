@@ -63,7 +63,7 @@ describe('toolStore', () => {
     store.setResult(mockResult)
     expect(store.result).toEqual(mockResult)
     expect(store.history).toHaveLength(1)
-    expect(store.history[0].toolId).toBe('readability')
+    expect(store.history[0]!.toolId).toBe('readability')
   })
 
   it('limits history to 20 runs', () => {

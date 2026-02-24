@@ -31,7 +31,7 @@ function onProviderChange(event: Event) {
   // Auto-select first model of the new provider
   const found = PROVIDERS.find((p) => p.value === target.value)
   if (found && found.models.length > 0) {
-    settingsStore.setModel(found.models[0])
+    settingsStore.setModel(found.models[0] as string)
   }
 }
 
