@@ -52,6 +52,9 @@ describe('settingsStore', () => {
     store.setModel('claude-sonnet')
     expect(store.provider).toBe('anthropic')
     expect(store.model).toBe('claude-sonnet')
+    const raw = JSON.parse(localStorage.getItem('wordsworth:settings')!)
+    expect(raw.provider).toBe('anthropic')
+    expect(raw.model).toBe('claude-sonnet')
   })
 
   it('loads provider and model from localStorage', () => {
