@@ -22,7 +22,7 @@ const isFixing = computed(() => fixingIssueKey.value !== null || fixingAll.value
 function severityClasses(severity: 'warning' | 'info'): string {
   return severity === 'warning'
     ? 'bg-yellow-100 text-yellow-800'
-    : 'bg-blue-100 text-blue-800'
+    : 'bg-orange-100 text-orange-800'
 }
 
 function issueKey(issue: StyleIssue): string {
@@ -81,7 +81,7 @@ async function onFixAll() {
           v-if="props.result.issues.length > 1 && settingsStore.hasKeyForCurrentProvider"
           data-testid="fix-all-btn"
           :disabled="fixingAll || isMergeActive || isFixing"
-          class="rounded bg-violet-600 px-3 py-1 text-xs font-medium text-white hover:bg-violet-700 transition-colors disabled:opacity-50"
+          class="rounded bg-orange-500 px-3 py-1 text-xs font-medium text-white hover:bg-orange-600 transition-colors disabled:opacity-50"
           @click="onFixAll"
         >
           {{ fixingAll ? 'Fixing...' : 'Fix All with AI' }}
@@ -100,7 +100,7 @@ async function onFixAll() {
           class="rounded border border-gray-200 text-sm transition-colors"
         >
           <div
-            :class="['p-3 transition-colors', isMergeActive ? 'opacity-60' : 'cursor-pointer hover:bg-blue-50']"
+            :class="['p-3 transition-colors', isMergeActive ? 'opacity-60' : 'cursor-pointer hover:bg-orange-50']"
             @click="onIssueClick(issue)"
           >
             <div class="mb-1 flex items-center gap-2">
@@ -127,7 +127,7 @@ async function onFixAll() {
             <button
               data-testid="fix-single-btn"
               :disabled="fixingIssueKey === issueKey(issue) || isMergeActive || isFixing"
-              class="text-xs font-medium text-violet-600 hover:text-violet-800 transition-colors disabled:opacity-50"
+              class="text-xs font-medium text-orange-600 hover:text-orange-800 transition-colors disabled:opacity-50"
               @click.stop="onFixSingle(issue)"
             >
               {{ fixingIssueKey === issueKey(issue) ? 'Fixing...' : 'Fix with AI' }}

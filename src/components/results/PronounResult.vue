@@ -26,7 +26,7 @@ watch(() => props.result.matches, (matches) => {
 
 <template>
   <div class="flex flex-col gap-4">
-    <div class="rounded bg-blue-50 p-3 text-sm text-blue-800">
+    <div class="rounded bg-orange-50 p-3 text-sm text-orange-800">
       {{ props.result.toneAssessment }}
     </div>
 

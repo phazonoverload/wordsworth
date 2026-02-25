@@ -88,7 +88,7 @@ describe('StyleCheckResult', () => {
       props: { result: makeResult([makeIssue({ severity: 'info' })]) },
     })
     const badge = wrapper.find('[data-testid="severity-badge"]')
-    expect(badge.classes()).toContain('bg-blue-100')
+    expect(badge.classes()).toContain('bg-orange-100')
   })
 
   it('calls setHighlightRange when an issue is clicked', async () => {

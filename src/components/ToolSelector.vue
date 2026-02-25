@@ -46,7 +46,7 @@ function onRun() {
     <select
       :value="toolStore.activeTool ?? ''"
       :disabled="toolStore.isRunning"
-      class="flex-1 min-w-0 rounded border border-gray-200 bg-white px-2 py-1.5 text-sm text-gray-700 outline-none focus:border-blue-400 disabled:opacity-50"
+      class="flex-1 min-w-0 rounded border border-gray-200 bg-white px-2 py-1.5 text-sm text-gray-700 outline-none focus:border-orange-400 disabled:opacity-50"
       @change="onSelect"
     >
       <option value="" disabled>Select a tool...</option>
@@ -69,7 +69,7 @@ function onRun() {
     <button
       v-if="isAiTool()"
       :disabled="isRunDisabled()"
-      class="shrink-0 cursor-pointer rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+      class="shrink-0 cursor-pointer rounded bg-orange-500 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
       @click="onRun"
     >
       Analyze with AI
