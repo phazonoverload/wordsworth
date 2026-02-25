@@ -51,7 +51,7 @@ function onDescriptionInput(event: Event) {
     </div>
     <textarea
       :value="description"
-      rows="2"
+      rows="4"
       class="rounded border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-900 resize-none"
       placeholder="Describe your target audience..."
       @input="onDescriptionInput"

@@ -1,8 +1,14 @@
-import { describe, it, expect } from 'vitest'
-import { mount } from '@vue/test-utils'
-import { createPinia } from 'pinia'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { mount, flushPromises } from '@vue/test-utils'
+import { createPinia, setActivePinia } from 'pinia'
 import ReadabilityResult from '../../results/ReadabilityResult.vue'
 import type { ReadabilityResult as ReadabilityResultType } from '@/tools/types'
+import { useSettingsStore } from '@/stores/settings'
+import { assessAudience } from '@/tools/audience-assessment'
+
+vi.mock('@/tools/audience-assessment', () => ({
+  assessAudience: vi.fn(),
+}))
 
 function makeResult(overrides: Partial<ReadabilityResultType> = {}): ReadabilityResultType {
   return {
@@ -13,7 +19,6 @@ function makeResult(overrides: Partial<ReadabilityResultType> = {}): Readability
     wordCount: 250,
     sentenceCount: 18,
     readingTimeMinutes: 1.2,
-    audienceNote: 'General audience',
     ...overrides,
   }
 }
@@ -21,14 +26,24 @@ function makeResult(overrides: Partial<ReadabilityResultType> = {}): Readability
 function mountResult(overrides: Partial<ReadabilityResultType> = {}) {
   return mount(ReadabilityResult, {
     props: { result: makeResult(overrides) },
-    global: { plugins: [createPinia()] },
   })
 }
 
 describe('ReadabilityResult', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    setActivePinia(createPinia())
+    vi.mocked(assessAudience).mockReset()
+  })
+
   it('displays grade level', () => {
     const wrapper = mountResult()
     expect(wrapper.text()).toContain('8')
+  })
+
+  it('displays grade level description', () => {
+    const wrapper = mountResult({ gradeLevel: 8 })
+    expect(wrapper.text()).toContain('middle school')
   })
 
   it('displays Flesch-Kincaid score', () => {
@@ -56,11 +71,6 @@ describe('ReadabilityResult', () => {
     expect(wrapper.text()).toContain('1.2')
   })
 
-  it('displays audience note', () => {
-    const wrapper = mountResult()
-    expect(wrapper.text()).toContain('General audience')
-  })
-
   it('shows green indicator for low grade level', () => {
     const wrapper = mountResult({ gradeLevel: 5 })
     const indicator = wrapper.find('[data-testid="grade-indicator"]')
@@ -82,5 +92,56 @@ describe('ReadabilityResult', () => {
   it('renders the ReaderContext (target audience) component', () => {
     const wrapper = mountResult()
     expect(wrapper.findComponent({ name: 'ReaderContext' }).exists()).toBe(true)
+  })
+
+  it('shows "Assess for audience" button when API key is set', () => {
+    const settings = useSettingsStore()
+    settings.setKey('openai', 'sk-test')
+    const wrapper = mountResult()
+    expect(wrapper.text()).toContain('Assess for audience')
+  })
+
+  it('does not show "Assess for audience" button when no API key', () => {
+    const wrapper = mountResult()
+    expect(wrapper.text()).not.toContain('Assess for audience')
+  })
+
+  it('clicking "Assess for audience" calls assessAudience', async () => {
+    vi.mocked(assessAudience).mockResolvedValue('Looks great!')
+    const settings = useSettingsStore()
+    settings.setKey('openai', 'sk-test')
+    const wrapper = mountResult()
+    await wrapper.find('button').trigger('click')
+    expect(assessAudience).toHaveBeenCalled()
+  })
+
+  it('displays assessment text after AI returns', async () => {
+    vi.mocked(assessAudience).mockResolvedValue('This text is well-suited for the audience.')
+    const settings = useSettingsStore()
+    settings.setKey('openai', 'sk-test')
+    const wrapper = mountResult()
+    await wrapper.find('button').trigger('click')
+    await flushPromises()
+    expect(wrapper.text()).toContain('This text is well-suited for the audience.')
+  })
+
+  it('hides button after assessment is displayed', async () => {
+    vi.mocked(assessAudience).mockResolvedValue('Assessment done.')
+    const settings = useSettingsStore()
+    settings.setKey('openai', 'sk-test')
+    const wrapper = mountResult()
+    await wrapper.find('button').trigger('click')
+    await flushPromises()
+    expect(wrapper.text()).not.toContain('Assess for audience')
+  })
+
+  it('displays error when assessment fails', async () => {
+    const settings = useSettingsStore()
+    settings.setKey('openai', 'sk-test')
+    vi.mocked(assessAudience).mockRejectedValue(new Error('API key invalid'))
+    const wrapper = mountResult()
+    await wrapper.find('button').trigger('click')
+    await flushPromises()
+    expect(wrapper.text()).toContain('API key invalid')
   })
 })

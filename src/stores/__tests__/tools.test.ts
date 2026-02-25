@@ -32,7 +32,6 @@ describe('toolStore', () => {
       wordCount: 100,
       sentenceCount: 5,
       readingTimeMinutes: 0.5,
-      audienceNote: 'Good for general audience',
     }
     store.setResult(mockResult)
     store.setActiveTool('pronouns')
@@ -58,7 +57,6 @@ describe('toolStore', () => {
       wordCount: 100,
       sentenceCount: 5,
       readingTimeMinutes: 0.5,
-      audienceNote: 'Good for general audience',
     }
     store.setResult(mockResult)
     expect(store.result).toEqual(mockResult)
@@ -131,7 +129,6 @@ describe('toolStore', () => {
       wordCount: 100,
       sentenceCount: 5,
       readingTimeMinutes: 0.5,
-      audienceNote: '',
     }
     for (let i = 0; i < 25; i++) {
       store.setResult(mockResult)

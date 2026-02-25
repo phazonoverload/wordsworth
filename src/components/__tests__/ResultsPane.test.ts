@@ -54,7 +54,6 @@ describe('ResultsPane', () => {
       wordCount: 200,
       sentenceCount: 15,
       readingTimeMinutes: 1,
-      audienceNote: 'General audience',
     }
     store.setActiveTool('readability')
     store.setResult(result)
