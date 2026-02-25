@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { watch } from 'vue'
 import type { PronounResult as PronounResultType, PronounCounts } from '@/tools/types'
 import { useToolStore } from '@/stores/tools'
 
@@ -15,11 +15,13 @@ const pronounGroups: { key: keyof PronounCounts; label: string; color: string; b
   { key: 'we', label: 'we / us / our / ours', color: 'amber', bgClass: 'bg-amber-50', barClass: 'bg-amber-400', borderClass: 'border-amber-200' },
 ]
 
-onMounted(() => {
-  if (props.result.matches.length > 0) {
-    toolStore.setPronounHighlights(props.result.matches)
+watch(() => props.result.matches, (matches) => {
+  if (matches.length > 0) {
+    toolStore.setPronounHighlights(matches)
+  } else {
+    toolStore.clearPronounHighlights()
   }
-})
+}, { immediate: true })
 </script>
 
 <template>
