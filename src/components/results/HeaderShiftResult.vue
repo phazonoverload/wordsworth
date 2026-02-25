@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import type { HeaderShiftResult as HeaderShiftResultType } from '@/tools/types'
-import { promoteHeaders, demoteHeaders, scanHeaders } from '@/tools/header-shift'
+import { promoteHeaders, demoteHeaders } from '@/tools/header-shift'
 import { useDocumentStore } from '@/stores/document'
-import { useToolStore } from '@/stores/tools'
 import { runTool } from '@/tools/runner'
 
 const props = defineProps<{
@@ -11,7 +10,6 @@ const props = defineProps<{
 }>()
 
 const documentStore = useDocumentStore()
-const toolStore = useToolStore()
 
 const errorMessage = ref<string | null>(null)
 const previousContent = ref<string | null>(null)

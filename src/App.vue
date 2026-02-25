@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Settings } from 'lucide-vue-next'
+import { Settings, Github } from 'lucide-vue-next'
 import EditorPane from '@/components/EditorPane.vue'
 import MergePane from '@/components/MergePane.vue'
 import ResultsPane from '@/components/ResultsPane.vue'
@@ -18,13 +18,22 @@ useAutoRun()
     <!-- Header -->
     <header class="border-b border-gray-200 px-4 py-4 md:py-2 flex items-center justify-between bg-white">
       <h1 class="text-lg font-semibold leading-tight">Wordsworth<br class="md:hidden" /> <span class="text-sm font-semibold text-gray-400">by <a href="https://lws.io" target="_blank" rel="noopener noreferrer" class="hover:text-gray-600">Kevin Lewis</a></span></h1>
-      <button
-        class="flex items-center gap-1.5 px-3 py-1 text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
-        @click="showSettings = true"
-      >
-        <Settings class="w-4 h-4" />
-        Settings
-      </button>
+      <div class="flex items-center gap-1">
+        <a
+          href="https://github.com/phazonoverload/wordsworth"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
+        >
+          <Github class="w-4 h-4" />
+        </a>
+        <button
+          class="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
+          @click="showSettings = true"
+        >
+          <Settings class="w-4 h-4" />
+        </button>
+      </div>
     </header>
 
     <!-- Main content: 2-pane layout -->

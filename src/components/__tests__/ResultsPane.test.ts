@@ -77,9 +77,10 @@ describe('ResultsPane', () => {
     const store = useToolStore()
     const result: PronounResult = {
       type: 'pronouns',
-      counts: { we: 1, i: 2, you: 3, they: 0, he: 0, she: 0, it: 1 },
-      total: 7,
-      percentages: { we: 14, i: 29, you: 43, they: 0, he: 0, she: 0, it: 14 },
+      counts: { we: 1, i: 2, you: 3 },
+      total: 6,
+      percentages: { we: 17, i: 33, you: 50 },
+      matches: [],
       toneAssessment: 'Conversational',
     }
     store.setActiveTool('pronouns')
