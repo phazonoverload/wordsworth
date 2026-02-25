@@ -3,6 +3,8 @@ import { ref } from 'vue'
 import { storage } from '@/lib/storage'
 import type { ToolId, ToolResult, ToolRun } from '@/tools/types'
 
+export type HighlightRange = { from: number; to: number }
+
 const MAX_HISTORY = 20
 
 export const useToolStore = defineStore('tools', () => {
@@ -12,10 +14,20 @@ export const useToolStore = defineStore('tools', () => {
   const isRunning = ref(false)
   const result = ref<ToolResult | null>(null)
   const history = ref<ToolRun[]>(savedHistory ?? [])
+  const highlightRange = ref<HighlightRange | null>(null)
 
   function setActiveTool(toolId: ToolId) {
     activeTool.value = toolId
     result.value = null
+    highlightRange.value = null
+  }
+
+  function setHighlightRange(range: HighlightRange) {
+    highlightRange.value = range
+  }
+
+  function clearHighlightRange() {
+    highlightRange.value = null
   }
 
   function setRunning(running: boolean) {
@@ -37,5 +49,8 @@ export const useToolStore = defineStore('tools', () => {
     }
   }
 
-  return { activeTool, isRunning, result, history, setActiveTool, setRunning, setResult }
+  return {
+    activeTool, isRunning, result, history, highlightRange,
+    setActiveTool, setRunning, setResult, setHighlightRange, clearHighlightRange,
+  }
 })

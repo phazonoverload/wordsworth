@@ -66,6 +66,31 @@ describe('toolStore', () => {
     expect(store.history[0]!.toolId).toBe('readability')
   })
 
+  it('starts with no highlight range', () => {
+    const store = useToolStore()
+    expect(store.highlightRange).toBeNull()
+  })
+
+  it('sets highlight range', () => {
+    const store = useToolStore()
+    store.setHighlightRange({ from: 10, to: 22 })
+    expect(store.highlightRange).toEqual({ from: 10, to: 22 })
+  })
+
+  it('clears highlight range', () => {
+    const store = useToolStore()
+    store.setHighlightRange({ from: 10, to: 22 })
+    store.clearHighlightRange()
+    expect(store.highlightRange).toBeNull()
+  })
+
+  it('clears highlight range when switching tools', () => {
+    const store = useToolStore()
+    store.setHighlightRange({ from: 10, to: 22 })
+    store.setActiveTool('pronouns')
+    expect(store.highlightRange).toBeNull()
+  })
+
   it('limits history to 20 runs', () => {
     const store = useToolStore()
     store.setActiveTool('readability')
