@@ -1,4 +1,4 @@
-![Wordsworth. Microtools for technical writers.](docs/images/main.png)
+<h1><img src="docs/images/main.png" alt="Wordsworth. Microtools for technical writers."></h1>
 
 Wordsworth is a browser-based writing workbench for people who write technical content. Paste your Markdown into the editor, pick a tool, and get instant feedback on readability, style, and more.
 
@@ -6,7 +6,7 @@ Most tools run entirely in the browser with no account or API key required. AI-p
 
 ## Tools
 
-### Readability
+<h3><img src="docs/images/readability.png" alt="Readability. Level, time, and audience fit at a glance."></h3>
 
 Answers the question: _is this pitched at the right level for my readers?_
 
@@ -16,9 +16,7 @@ The grade level is displayed with a color-coded indicator -- green for grade 8 a
 
 Below the metrics, you can select a target audience from presets (Senior developers, Junior developers, Non-technical stakeholders, General audience) or write your own custom description. If you have an AI API key configured, an "Assess for audience with AI" button sends your document and audience description to an LLM, which returns a one-paragraph verdict on whether your jargon level, sentence complexity, and assumed knowledge are appropriate. The assessment considers context -- it won't penalise technical terminology when writing for a technical audience.
 
-<img src="docs/images/readability.png" alt="Readability tool showing grade level, metrics, target audience selector, and AI assessment">
-
-### Style Check
+<h3><img src="docs/images/style-check.png" alt="Style Check. Passive voice, wordiness, and inconsistencies."></h3>
 
 Scans your prose for three categories of style issues:
 
@@ -28,9 +26,7 @@ Scans your prose for three categories of style issues:
 
 Each issue shows the line number, the flagged text, and a suggestion. Clicking an issue highlights the relevant line in the editor. If you have an AI API key configured, you can fix individual issues or all issues at once -- the AI rewrites the affected text and presents a diff for you to review and accept before anything changes.
 
-<img src="docs/images/style-check.png" alt="Style Check tool showing inconsistency detection with editor highlighting">
-
-### Pronouns
+<h3><img src="docs/images/pronouns.png" alt="Pronouns. See who your writing talks to."></h3>
 
 Reveals the pronoun balance in your writing by counting three groups: I/me/my, you/your, and we/us/our. It calculates percentages and produces a tone assessment -- from "strongly reader-focused" to "strongly author-focused" -- so you can see at a glance whether your docs talk _to_ the reader or _at_ them.
 
@@ -38,19 +34,23 @@ All pronoun matches are highlighted inline in the editor with color-coded marker
 
 Technical documentation generally benefits from a reader-focused "you" voice. This tool makes the balance visible without you having to count anything.
 
-<img src="docs/images/pronouns.png" alt="Pronouns tool showing tone assessment, pronoun counts, and inline editor highlighting">
-
-### Header Shift
+<h3><img src="docs/images/header-shift.png" alt="Header Shift. Promote or demote all heading levels at once."></h3>
 
 Bulk-shifts all Markdown header levels up or down by one. Promote turns every H2 into H1, every H3 into H2, and so on. Demote does the reverse.
 
 This is useful when embedding content into a larger site where the page title occupies H1, so your document headings need to drop a level. The tool shows a breakdown of how many headers exist at each level (H1-H6), blocks unsafe operations (promoting when an H1 already exists, demoting when an H6 exists), and provides an undo button to revert the last shift.
 
-<img src="docs/images/header-shift.png" alt="Header Shift tool showing header counts and promote/demote buttons">
+<h3><img src="docs/images/promises.png" alt="Promises. Check if your intro delivers on its claims."></h3>
+
+Answers the question: _does your article deliver on what the introduction sets up?_
+
+This AI-powered tool reads through your document and identifies claims or promises made in the opening paragraphs -- things like "this guide will show you how to..." or "by the end you'll understand...". It then checks whether each promise is actually fulfilled in the body and conclusion, returning a verdict of pass, fail, or partial for each one, along with evidence from the text.
+
+The result shows a summary count (e.g. "2 of 3 promises fulfilled") followed by each promise with a color-coded verdict -- green for pass, red for fail, yellow for partial. Requires an AI API key.
 
 ## Running locally
 
-Most tools (Readability, Style Check, Pronouns, Header Shift) run entirely in the browser with no backend. The AI-powered features (audience assessment, style fixes) route through a Netlify Functions proxy at `netlify/functions/ai-proxy.mts`, so you need to use the Netlify CLI to run the dev server:
+Most tools (Readability, Style Check, Pronouns, Header Shift) run entirely in the browser with no backend. The AI-powered features (audience assessment, style fixes, promise tracking) route through a Netlify Functions proxy at `netlify/functions/ai-proxy.mts`, so you need to use the Netlify CLI to run the dev server:
 
 ```
 npm install

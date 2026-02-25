@@ -58,6 +58,7 @@ function onRun() {
         {{ tool.label }}
       </option>
     </select>
+    <p v-if="activeDef()" class="text-xs text-gray-400">{{ activeDef()!.description }}</p>
     <button
       v-if="showAiButton()"
       :disabled="isRunDisabled()"
