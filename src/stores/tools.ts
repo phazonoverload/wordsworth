@@ -15,6 +15,8 @@ export const useToolStore = defineStore('tools', () => {
   const result = ref<ToolResult | null>(null)
   const history = ref<ToolRun[]>(savedHistory ?? [])
   const highlightRange = ref<HighlightRange | null>(null)
+  const mergeOriginal = ref<string | null>(null)
+  const mergeModified = ref<string | null>(null)
 
   function setActiveTool(toolId: ToolId) {
     activeTool.value = toolId
@@ -34,6 +36,16 @@ export const useToolStore = defineStore('tools', () => {
     isRunning.value = running
   }
 
+  function setMergeState(original: string, modified: string) {
+    mergeOriginal.value = original
+    mergeModified.value = modified
+  }
+
+  function clearMergeState() {
+    mergeOriginal.value = null
+    mergeModified.value = null
+  }
+
   function setResult(toolResult: ToolResult) {
     result.value = toolResult
     if (activeTool.value) {
@@ -51,6 +63,8 @@ export const useToolStore = defineStore('tools', () => {
 
   return {
     activeTool, isRunning, result, history, highlightRange,
+    mergeOriginal, mergeModified,
     setActiveTool, setRunning, setResult, setHighlightRange, clearHighlightRange,
+    setMergeState, clearMergeState,
   }
 })
