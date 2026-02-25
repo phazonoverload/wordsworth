@@ -1,15 +1,13 @@
-import { generateObject } from 'ai'
-import { z } from 'zod'
-import { getModel } from '@/ai/client'
+import { callAI } from '@/ai/client'
 import type { StyleIssue } from './types'
 
-const singleFixSchema = z.object({
-  editedParagraph: z.string().describe('The paragraph with the style issue fixed'),
-})
+interface SingleFixResponse {
+  editedParagraph: string
+}
 
-const batchFixSchema = z.object({
-  editedDocument: z.string().describe('The full document with all flagged style issues fixed'),
-})
+interface BatchFixResponse {
+  editedDocument: string
+}
 
 /**
  * Extract the paragraph containing the given line number.
@@ -48,7 +46,6 @@ export function extractParagraph(text: string, lineNumber: number): { paragraph:
 }
 
 export async function fixSingleIssue(text: string, issue: StyleIssue, readerContext: string): Promise<string> {
-  const model = getModel()
   const { paragraph, startIndex, endIndex } = extractParagraph(text, issue.line)
 
   const issueStart = issue.absoluteOffset - startIndex
@@ -64,9 +61,8 @@ export async function fixSingleIssue(text: string, issue: StyleIssue, readerCont
     readerContext ? `Target audience: ${readerContext}` : '',
   ].filter(Boolean).join('\n')
 
-  const { object } = await generateObject({
-    model,
-    schema: singleFixSchema,
+  const object = await callAI<SingleFixResponse>({
+    action: 'fix-single',
     system,
     prompt: paragraph,
   })
@@ -75,8 +71,6 @@ export async function fixSingleIssue(text: string, issue: StyleIssue, readerCont
 }
 
 export async function fixAllIssues(text: string, issues: StyleIssue[], readerContext: string): Promise<string> {
-  const model = getModel()
-
   const issueList = issues.map((issue, i) => {
     return `${i + 1}. Line ${issue.line}: [${issue.category}] ${issue.message}${issue.suggestion ? ` (suggestion: ${issue.suggestion})` : ''}`
   }).join('\n')
@@ -89,9 +83,8 @@ export async function fixAllIssues(text: string, issues: StyleIssue[], readerCon
     readerContext ? `Target audience: ${readerContext}` : '',
   ].filter(Boolean).join('\n')
 
-  const { object } = await generateObject({
-    model,
-    schema: batchFixSchema,
+  const object = await callAI<BatchFixResponse>({
+    action: 'fix-all',
     system,
     prompt: text,
   })

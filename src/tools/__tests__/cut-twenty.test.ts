@@ -1,20 +1,14 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
+import { useSettingsStore } from '@/stores/settings'
 
-const { mockGenerateObject } = vi.hoisted(() => ({
-  mockGenerateObject: vi.fn(),
-}))
-
-vi.mock('ai', () => ({
-  generateObject: mockGenerateObject,
-}))
+const mockCallAI = vi.fn()
 
 vi.mock('@/ai/client', () => ({
-  getModel: vi.fn(() => ({ modelId: 'test-model', provider: 'openai' })),
+  callAI: (...args: unknown[]) => mockCallAI(...args),
 }))
 
 import { cutTwenty } from '@/tools/cut-twenty'
-import { getModel } from '@/ai/client'
 
 const sampleText =
   'The quick brown fox jumps over the lazy dog. This is some additional text that provides more content for the tool to work with. We need enough words here to make the test meaningful and realistic.'
@@ -39,8 +33,13 @@ const mockAiResponse = {
 describe('cutTwenty', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
+    // Set up a valid API key so callAI won't throw before reaching the mock
+    const store = useSettingsStore()
+    store.setProvider('openai')
+    store.setModel('gpt-5-nano')
+    store.setKey('openai', 'sk-test')
     vi.clearAllMocks()
-    mockGenerateObject.mockResolvedValue({ object: mockAiResponse })
+    mockCallAI.mockResolvedValue(mockAiResponse)
   })
 
   it('returns a CutResult with type cut-twenty', async () => {
@@ -88,37 +87,28 @@ describe('cutTwenty', () => {
     expect(result.reductionPercent).toBeCloseTo(expected, 1)
   })
 
-  it('calls generateObject with the model from getModel()', async () => {
+  it('calls callAI with action cut-twenty', async () => {
     await cutTwenty(sampleText, sampleReaderContext)
-    expect(getModel).toHaveBeenCalled()
-    expect(mockGenerateObject).toHaveBeenCalledTimes(1)
-    const call = mockGenerateObject.mock.calls[0]![0]
-    expect(call.model).toEqual({ modelId: 'test-model', provider: 'openai' })
+    expect(mockCallAI).toHaveBeenCalledTimes(1)
+    const call = mockCallAI.mock.calls[0]![0]
+    expect(call.action).toBe('cut-twenty')
   })
 
-  it('includes readerContext in the prompt', async () => {
+  it('includes readerContext in the system prompt', async () => {
     await cutTwenty(sampleText, sampleReaderContext)
-    const call = mockGenerateObject.mock.calls[0]![0]
-    const hasContextInSystem = call.system?.includes(sampleReaderContext)
-    const hasContextInPrompt = call.prompt?.includes(sampleReaderContext)
-    expect(hasContextInSystem || hasContextInPrompt).toBe(true)
+    const call = mockCallAI.mock.calls[0]![0]
+    expect(call.system).toContain(sampleReaderContext)
   })
 
-  it('includes the text in the prompt', async () => {
+  it('includes the text as the prompt', async () => {
     await cutTwenty(sampleText, sampleReaderContext)
-    const call = mockGenerateObject.mock.calls[0]![0]
+    const call = mockCallAI.mock.calls[0]![0]
     expect(call.prompt).toContain(sampleText)
-  })
-
-  it('passes a zod schema to generateObject', async () => {
-    await cutTwenty(sampleText, sampleReaderContext)
-    const call = mockGenerateObject.mock.calls[0]![0]
-    expect(call.schema).toBeDefined()
   })
 
   it('instructs the AI to act as a technical editor in the system prompt', async () => {
     await cutTwenty(sampleText, sampleReaderContext)
-    const call = mockGenerateObject.mock.calls[0]![0]
+    const call = mockCallAI.mock.calls[0]![0]
     expect(call.system).toBeDefined()
     const system = call.system.toLowerCase()
     expect(system).toContain('editor')
@@ -126,7 +116,7 @@ describe('cutTwenty', () => {
 
   it('instructs the AI to cut by ~20% in the system prompt', async () => {
     await cutTwenty(sampleText, sampleReaderContext)
-    const call = mockGenerateObject.mock.calls[0]![0]
+    const call = mockCallAI.mock.calls[0]![0]
     const system = call.system.toLowerCase()
     expect(system).toContain('20%')
   })

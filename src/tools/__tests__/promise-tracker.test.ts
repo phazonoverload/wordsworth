@@ -1,20 +1,14 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
+import { useSettingsStore } from '@/stores/settings'
 
-const { mockGenerateObject } = vi.hoisted(() => ({
-  mockGenerateObject: vi.fn(),
-}))
-
-vi.mock('ai', () => ({
-  generateObject: mockGenerateObject,
-}))
+const mockCallAI = vi.fn()
 
 vi.mock('@/ai/client', () => ({
-  getModel: vi.fn(() => ({ modelId: 'test-model', provider: 'openai' })),
+  callAI: (...args: unknown[]) => mockCallAI(...args),
 }))
 
 import { trackPromises } from '@/tools/promise-tracker'
-import { getModel } from '@/ai/client'
 
 const sampleText = `In this article, we will explore three key strategies for improving code quality.
 We will also demonstrate how automated testing reduces bugs.
@@ -49,8 +43,12 @@ const mockAiResponse = {
 describe('trackPromises', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
+    const store = useSettingsStore()
+    store.setProvider('openai')
+    store.setModel('gpt-5-nano')
+    store.setKey('openai', 'sk-test')
     vi.clearAllMocks()
-    mockGenerateObject.mockResolvedValue({ object: mockAiResponse })
+    mockCallAI.mockResolvedValue(mockAiResponse)
   })
 
   it('returns a PromiseResult with type promise-tracker', async () => {
@@ -74,9 +72,7 @@ describe('trackPromises', () => {
 
   it('maps promiseIndex to promiseId in verdicts', async () => {
     const result = await trackPromises(sampleText)
-    // Verdict 0 references promise at index 0
     expect(result.verdicts[0]!.promiseId).toBe(result.promises[0]!.id)
-    // Verdict 1 references promise at index 1
     expect(result.verdicts[1]!.promiseId).toBe(result.promises[1]!.id)
   })
 
@@ -96,29 +92,22 @@ describe('trackPromises', () => {
     expect(result.verdicts[1]!.evidence).toBe(mockAiResponse.verdicts[1]!.evidence)
   })
 
-  it('calls generateObject with the model from getModel()', async () => {
+  it('calls callAI with action promise-tracker', async () => {
     await trackPromises(sampleText)
-    expect(getModel).toHaveBeenCalled()
-    expect(mockGenerateObject).toHaveBeenCalledTimes(1)
-    const call = mockGenerateObject.mock.calls[0]![0]
-    expect(call.model).toEqual({ modelId: 'test-model', provider: 'openai' })
+    expect(mockCallAI).toHaveBeenCalledTimes(1)
+    const call = mockCallAI.mock.calls[0]![0]
+    expect(call.action).toBe('promise-tracker')
   })
 
-  it('includes the text in the prompt', async () => {
+  it('includes the text as the prompt', async () => {
     await trackPromises(sampleText)
-    const call = mockGenerateObject.mock.calls[0]![0]
+    const call = mockCallAI.mock.calls[0]![0]
     expect(call.prompt).toContain(sampleText)
-  })
-
-  it('passes a zod schema to generateObject', async () => {
-    await trackPromises(sampleText)
-    const call = mockGenerateObject.mock.calls[0]![0]
-    expect(call.schema).toBeDefined()
   })
 
   it('includes a system prompt about identifying promises', async () => {
     await trackPromises(sampleText)
-    const call = mockGenerateObject.mock.calls[0]![0]
+    const call = mockCallAI.mock.calls[0]![0]
     expect(call.system).toBeDefined()
     const system = call.system.toLowerCase()
     expect(system).toContain('promise')
@@ -126,7 +115,7 @@ describe('trackPromises', () => {
 
   it('system prompt instructs about pass/fail/partial verdicts', async () => {
     await trackPromises(sampleText)
-    const call = mockGenerateObject.mock.calls[0]![0]
+    const call = mockCallAI.mock.calls[0]![0]
     const system = call.system.toLowerCase()
     expect(system).toContain('pass')
     expect(system).toContain('fail')
@@ -134,16 +123,14 @@ describe('trackPromises', () => {
   })
 
   it('handles multiple verdicts referencing the same promise', async () => {
-    mockGenerateObject.mockResolvedValue({
-      object: {
-        promises: [
-          { text: 'Single promise' },
-        ],
-        verdicts: [
-          { promiseIndex: 0, verdict: 'pass', evidence: 'First evidence' },
-          { promiseIndex: 0, verdict: 'partial', evidence: 'Second evidence' },
-        ],
-      },
+    mockCallAI.mockResolvedValue({
+      promises: [
+        { text: 'Single promise' },
+      ],
+      verdicts: [
+        { promiseIndex: 0, verdict: 'pass', evidence: 'First evidence' },
+        { promiseIndex: 0, verdict: 'partial', evidence: 'Second evidence' },
+      ],
     })
     const result = await trackPromises(sampleText)
     expect(result.verdicts.length).toBe(2)

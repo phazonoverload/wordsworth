@@ -1,35 +1,45 @@
 import { useSettingsStore } from '@/stores/settings'
-import { createOpenAI } from '@ai-sdk/openai'
-import { createAnthropic } from '@ai-sdk/anthropic'
-import { createGoogleGenerativeAI } from '@ai-sdk/google'
-import type { LanguageModelV3 } from '@ai-sdk/provider'
 
-const SUPPORTED_PROVIDERS = ['openai', 'anthropic', 'google'] as const
-type SupportedProvider = (typeof SUPPORTED_PROVIDERS)[number]
+export type ActionId = 'cut-twenty' | 'fix-single' | 'fix-all' | 'promise-tracker'
 
-export function getModel(): LanguageModelV3 {
+export interface CallAIParams {
+  action: ActionId
+  system: string
+  prompt: string
+}
+
+/**
+ * Call the AI proxy function.
+ * Reads provider/model/apiKey from the settings store,
+ * then POSTs to /api/ai and returns the parsed JSON response.
+ */
+export async function callAI<T>(params: CallAIParams): Promise<T> {
   const store = useSettingsStore()
   const providerId = store.provider
   const modelId = store.model
-
-  if (!SUPPORTED_PROVIDERS.includes(providerId as SupportedProvider)) {
-    throw new Error(`Unsupported provider: ${providerId}`)
-  }
-
-  const apiKey = store.keys[providerId as SupportedProvider]
+  const apiKey = store.keys[providerId as keyof typeof store.keys]
 
   if (!apiKey) {
     throw new Error(`No API key configured for ${providerId}`)
   }
 
-  switch (providerId) {
-    case 'openai':
-      return createOpenAI({ apiKey })(modelId)
-    case 'anthropic':
-      return createAnthropic({ apiKey })(modelId)
-    case 'google':
-      return createGoogleGenerativeAI({ apiKey })(modelId)
-    default:
-      throw new Error(`Unsupported provider: ${providerId}`)
+  const response = await fetch('/api/ai', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: params.action,
+      provider: providerId,
+      model: modelId,
+      apiKey,
+      system: params.system,
+      prompt: params.prompt,
+    }),
+  })
+
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({ error: 'Unknown error' }))
+    throw new Error(errorBody.error ?? `AI proxy returned ${response.status}`)
   }
+
+  return response.json() as Promise<T>
 }

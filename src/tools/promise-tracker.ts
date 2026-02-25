@@ -1,22 +1,16 @@
-import { generateObject } from 'ai'
-import { z } from 'zod'
-import { getModel } from '@/ai/client'
+import { callAI } from '@/ai/client'
 import type { PromiseResult, Promise as PromiseItem } from './types'
 
-const promiseResponseSchema = z.object({
-  promises: z.array(z.object({
-    text: z.string().describe('The promise or claim made in the introduction'),
-  })),
-  verdicts: z.array(z.object({
-    promiseIndex: z.number().describe('Index of the promise this verdict is for'),
-    verdict: z.enum(['pass', 'fail', 'partial']).describe('Whether the promise was fulfilled'),
-    evidence: z.string().describe('Evidence supporting the verdict'),
-  })),
-})
+interface PromiseResponse {
+  promises: Array<{ text: string }>
+  verdicts: Array<{
+    promiseIndex: number
+    verdict: 'pass' | 'fail' | 'partial'
+    evidence: string
+  }>
+}
 
 export async function trackPromises(text: string): Promise<PromiseResult> {
-  const model = getModel()
-
   const system = [
     'You are an editorial analyst. Your task is to identify promises and claims made in the introduction of the provided text,',
     'then check whether each promise is fulfilled in the body and conclusion.',
@@ -27,9 +21,8 @@ export async function trackPromises(text: string): Promise<PromiseResult> {
     'Provide evidence from the text supporting each verdict.',
   ].join('\n')
 
-  const { object } = await generateObject({
-    model,
-    schema: promiseResponseSchema,
+  const object = await callAI<PromiseResponse>({
+    action: 'promise-tracker',
     system,
     prompt: text,
   })

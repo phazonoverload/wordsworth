@@ -34,6 +34,10 @@ const theme = EditorView.theme({
   '&.cm-focused': {
     outline: 'none',
   },
+  '.cm-gutters': {
+    backgroundColor: 'transparent',
+    border: 'none',
+  },
   '&.cm-focused .cm-selectionBackground, .cm-selectionBackground': {
     backgroundColor: '#fef08a !important',
   },

@@ -1,20 +1,16 @@
-import { generateObject } from 'ai'
-import { z } from 'zod'
-import { getModel } from '@/ai/client'
+import { callAI } from '@/ai/client'
 import { countWords } from '@/lib/text-utils'
 import type { CutResult } from './types'
 
-const cutResponseSchema = z.object({
-  chunks: z.array(z.object({
-    original: z.string().describe('The original text segment'),
-    edited: z.string().describe('The condensed version'),
-    reason: z.string().describe('Why this edit was made'),
-  })),
-})
+interface CutResponse {
+  chunks: Array<{
+    original: string
+    edited: string
+    reason: string
+  }>
+}
 
 export async function cutTwenty(text: string, readerContext: string): Promise<CutResult> {
-  const model = getModel()
-
   const system = [
     'You are a technical editor. Your task is to cut the provided text by approximately 20% while preserving technical accuracy and meaning.',
     'Return only the chunks where you made edits — do not include unchanged sections.',
@@ -24,9 +20,8 @@ export async function cutTwenty(text: string, readerContext: string): Promise<Cu
       : '',
   ].filter(Boolean).join('\n')
 
-  const { object } = await generateObject({
-    model,
-    schema: cutResponseSchema,
+  const object = await callAI<CutResponse>({
+    action: 'cut-twenty',
     system,
     prompt: text,
   })
