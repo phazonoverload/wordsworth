@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useToolStore } from '@/stores/tools'
+import ToolSelector from '@/components/ToolSelector.vue'
 import ReadabilityResult from '@/components/results/ReadabilityResult.vue'
 import StyleCheckResult from '@/components/results/StyleCheckResult.vue'
 import PronounResult from '@/components/results/PronounResult.vue'
@@ -11,6 +12,7 @@ const toolStore = useToolStore()
 
 <template>
   <div class="results-pane flex flex-col gap-4 p-4">
+    <ToolSelector />
     <div v-if="toolStore.isRunning" class="text-sm text-gray-500">Analyzing...</div>
     <div v-else-if="!toolStore.result" class="text-sm text-gray-500">
       Select a tool and run it to see results

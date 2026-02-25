@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import ResultsPane from '../ResultsPane.vue'
@@ -10,6 +10,12 @@ import type {
   CutResult,
   PromiseResult,
 } from '@/tools/types'
+
+vi.mock('@/tools/runner', () => ({
+  runTool: vi.fn(),
+}))
+
+import ToolSelector from '../ToolSelector.vue'
 
 describe('ResultsPane', () => {
   beforeEach(() => {
@@ -99,5 +105,10 @@ describe('ResultsPane', () => {
     store.setResult(result)
     const wrapper = shallowMount(ResultsPane)
     expect(wrapper.findComponent({ name: 'PromiseResult' }).exists()).toBe(true)
+  })
+
+  it('renders the ToolSelector component', () => {
+    const wrapper = shallowMount(ResultsPane)
+    expect(wrapper.findComponent(ToolSelector).exists()).toBe(true)
   })
 })

@@ -22,9 +22,9 @@ describe('App', () => {
     expect(header.text()).toContain('Wordsworth')
   })
 
-  it('renders the ToolSelector component', () => {
+  it('does not render ToolSelector directly (it is inside ResultsPane)', () => {
     const wrapper = mountApp()
-    expect(wrapper.findComponent({ name: 'ToolSelector' }).exists()).toBe(true)
+    expect(wrapper.findComponent({ name: 'ToolSelector' }).exists()).toBe(false)
   })
 
   it('renders the EditorPane component', () => {

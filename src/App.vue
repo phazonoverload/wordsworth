@@ -2,7 +2,6 @@
 import { ref } from 'vue'
 import { Settings } from 'lucide-vue-next'
 import EditorPane from '@/components/EditorPane.vue'
-import ToolSelector from '@/components/ToolSelector.vue'
 import ReaderContext from '@/components/ReaderContext.vue'
 import ResultsPane from '@/components/ResultsPane.vue'
 import SettingsModal from '@/components/SettingsModal.vue'
@@ -26,7 +25,7 @@ useAutoRun()
       </button>
     </header>
 
-    <!-- Main content: 3-column layout -->
+    <!-- Main content: 2-pane layout -->
     <div class="flex-1 flex overflow-hidden">
       <!-- Left: Editor + Reader Context -->
       <div class="flex-1 flex flex-col overflow-hidden">
@@ -34,13 +33,8 @@ useAutoRun()
         <EditorPane class="flex-1" />
       </div>
 
-      <!-- Center: Tool bar -->
-      <aside class="w-56 border-x border-gray-200 overflow-y-auto bg-gray-50">
-        <ToolSelector />
-      </aside>
-
-      <!-- Right: Results -->
-      <aside class="w-96 overflow-y-auto">
+      <!-- Right: Results (includes ToolSelector at top) -->
+      <aside class="w-96 border-l border-gray-200 overflow-y-auto">
         <ResultsPane />
       </aside>
     </div>
