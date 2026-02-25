@@ -37,19 +37,23 @@ function onRejectChunk(chunkId: string) {
 </script>
 
 <template>
-  <div class="results-pane flex flex-col gap-4 p-4">
-    <ToolSelector />
-    <div v-if="!settingsStore.hasKeyForCurrentProvider && !toolStore.activeTool" class="text-sm text-amber-600">
-      Please configure AI in the settings before using tools
+  <div class="results-pane flex h-full flex-col">
+    <div class="shrink-0 border-b border-gray-200 p-4">
+      <ToolSelector />
     </div>
-    <div v-else-if="toolStore.isRunning" class="text-sm text-gray-500">Analyzing...</div>
-    <div v-else-if="!toolStore.result" class="text-sm text-gray-500">
-      Select a tool and run it to see results
+    <div class="flex-1 overflow-y-auto p-4">
+      <div v-if="!settingsStore.hasKeyForCurrentProvider && !toolStore.activeTool" class="text-sm text-amber-600">
+        Please configure AI in the settings before using tools
+      </div>
+      <div v-else-if="toolStore.isRunning" class="text-sm text-gray-500">Analyzing...</div>
+      <div v-else-if="!toolStore.result" class="text-sm text-gray-500">
+        Select a tool and run it to see results
+      </div>
+      <ReadabilityResult v-else-if="toolStore.result.type === 'readability'" :result="toolStore.result" />
+      <StyleCheckResult v-else-if="toolStore.result.type === 'style-check'" :result="toolStore.result" />
+      <PronounResult v-else-if="toolStore.result.type === 'pronouns'" :result="toolStore.result" />
+      <CutResult v-else-if="toolStore.result.type === 'cut-twenty'" :result="toolStore.result" @accept="onAcceptChunk" @reject="onRejectChunk" />
+      <PromiseResult v-else-if="toolStore.result.type === 'promise-tracker'" :result="toolStore.result" />
     </div>
-    <ReadabilityResult v-else-if="toolStore.result.type === 'readability'" :result="toolStore.result" />
-    <StyleCheckResult v-else-if="toolStore.result.type === 'style-check'" :result="toolStore.result" />
-    <PronounResult v-else-if="toolStore.result.type === 'pronouns'" :result="toolStore.result" />
-    <CutResult v-else-if="toolStore.result.type === 'cut-twenty'" :result="toolStore.result" @accept="onAcceptChunk" @reject="onRejectChunk" />
-    <PromiseResult v-else-if="toolStore.result.type === 'promise-tracker'" :result="toolStore.result" />
   </div>
 </template>

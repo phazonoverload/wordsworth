@@ -28,17 +28,17 @@ useAutoRun()
     </header>
 
     <!-- Main content: 2-pane layout -->
-    <div class="flex-1 flex overflow-hidden">
-      <!-- Left: Editor + Reader Context -->
-      <div class="flex-1 flex flex-col overflow-hidden">
+    <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
+      <!-- Tools/Results: top on mobile, right sidebar on desktop -->
+      <aside class="h-80 shrink-0 border-b border-gray-200 md:order-2 md:h-auto md:w-96 md:border-b-0 md:border-l">
+        <ResultsPane />
+      </aside>
+
+      <!-- Editor -->
+      <div class="flex-1 flex flex-col overflow-hidden md:order-1">
         <MergePane v-if="toolStore.mergeOriginal && toolStore.mergeModified" class="flex-1" />
         <EditorPane v-else class="flex-1" />
       </div>
-
-      <!-- Right: Results (includes ToolSelector at top) -->
-      <aside class="w-96 border-l border-gray-200 overflow-y-auto">
-        <ResultsPane />
-      </aside>
     </div>
 
     <!-- Settings Modal -->

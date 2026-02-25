@@ -66,7 +66,7 @@ function onKeydown(event: KeyboardEvent) {
 
       <!-- Modal content -->
       <div class="relative flex items-center justify-center h-full pointer-events-none">
-        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md pointer-events-auto">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4 pointer-events-auto">
           <!-- Header -->
           <div class="flex items-center justify-between mb-6">
             <h2 class="text-lg font-semibold text-gray-900">Settings</h2>
