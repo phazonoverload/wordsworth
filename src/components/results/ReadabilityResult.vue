@@ -93,7 +93,7 @@ watch(() => documentStore.readerContext.description, () => {
       class="bg-orange-500 hover:bg-orange-600 text-white rounded px-3 py-1.5 text-sm font-medium"
       @click="runAssessment"
     >
-      Assess for audience
+      Assess for audience with AI
     </button>
 
     <div v-if="isAssessing" class="text-sm text-gray-500">

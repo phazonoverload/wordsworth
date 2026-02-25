@@ -94,19 +94,19 @@ describe('ReadabilityResult', () => {
     expect(wrapper.findComponent({ name: 'ReaderContext' }).exists()).toBe(true)
   })
 
-  it('shows "Assess for audience" button when API key is set', () => {
+  it('shows "Assess for audience with AI" button when API key is set', () => {
     const settings = useSettingsStore()
     settings.setKey('openai', 'sk-test')
     const wrapper = mountResult()
     expect(wrapper.text()).toContain('Assess for audience')
   })
 
-  it('does not show "Assess for audience" button when no API key', () => {
+  it('does not show "Assess for audience with AI" button when no API key', () => {
     const wrapper = mountResult()
     expect(wrapper.text()).not.toContain('Assess for audience')
   })
 
-  it('clicking "Assess for audience" calls assessAudience', async () => {
+  it('clicking "Assess for audience with AI" calls assessAudience', async () => {
     vi.mocked(assessAudience).mockResolvedValue('Looks great!')
     const settings = useSettingsStore()
     settings.setKey('openai', 'sk-test')
