@@ -73,7 +73,7 @@ describe('checkStyle', () => {
     const result = checkStyle(text, '')
     const passiveIssues = result.issues.filter((i) => i.category === 'passive-voice')
     expect(passiveIssues.length).toBeGreaterThan(0)
-    const issue = passiveIssues[0]
+    const issue = passiveIssues[0]!
     expect(issue.line).toBe(2)
     expect(issue.absoluteOffset).toBe(text.indexOf('was written'))
   })
