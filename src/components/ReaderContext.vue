@@ -31,11 +31,11 @@ function onDescriptionInput(event: Event) {
 </script>
 
 <template>
-  <div class="flex flex-col gap-1.5">
-    <label class="text-xs font-medium text-zinc-400">Target Audience</label>
+  <div class="flex flex-col gap-2 border-b border-gray-200 px-5 py-4">
+    <label class="text-xs font-medium text-gray-500">Target Audience</label>
     <select
       :value="selectedPreset"
-      class="rounded border border-zinc-700 bg-zinc-800 px-2 py-1 text-sm text-zinc-200"
+      class="rounded border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-900"
       @change="onPresetChange"
     >
       <option
@@ -49,7 +49,7 @@ function onDescriptionInput(event: Event) {
     <textarea
       :value="description"
       rows="2"
-      class="rounded border border-zinc-700 bg-zinc-800 px-2 py-1 text-sm text-zinc-200 resize-none"
+      class="rounded border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-900 resize-none"
       placeholder="Describe your target audience..."
       @input="onDescriptionInput"
     />

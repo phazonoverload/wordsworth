@@ -83,13 +83,13 @@ function onKeydown(event: KeyboardEvent) {
 
       <!-- Modal content -->
       <div class="relative flex items-center justify-center h-full pointer-events-none">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md pointer-events-auto">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md pointer-events-auto">
           <!-- Header -->
           <div class="flex items-center justify-between mb-6">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Settings</h2>
+            <h2 class="text-lg font-semibold text-gray-900">Settings</h2>
             <button
               data-testid="close-button"
-              class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              class="text-gray-400 hover:text-gray-600"
               @click="close"
             >
               &times;
@@ -98,13 +98,13 @@ function onKeydown(event: KeyboardEvent) {
 
           <!-- Provider selection -->
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label class="block text-sm font-medium text-gray-700 mb-1">
               AI Provider
             </label>
             <select
               data-testid="provider-select"
               :value="settingsStore.provider"
-              class="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              class="w-full border border-gray-300 rounded px-3 py-2 bg-white text-gray-900"
               @change="onProviderChange"
             >
               <option
@@ -119,13 +119,13 @@ function onKeydown(event: KeyboardEvent) {
 
           <!-- Model selection -->
           <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label class="block text-sm font-medium text-gray-700 mb-1">
               Model
             </label>
             <select
               data-testid="model-select"
               :value="settingsStore.model"
-              class="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              class="w-full border border-gray-300 rounded px-3 py-2 bg-white text-gray-900"
               @change="onModelChange"
             >
               <option
@@ -140,7 +140,7 @@ function onKeydown(event: KeyboardEvent) {
 
           <!-- API Keys -->
           <div class="space-y-4">
-            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">API Keys</h3>
+            <h3 class="text-sm font-medium text-gray-700">API Keys</h3>
             <div
               v-for="p in PROVIDERS"
               :key="p.value"
@@ -150,9 +150,9 @@ function onKeydown(event: KeyboardEvent) {
               <span
                 :data-testid="`key-indicator-${p.value}`"
                 class="inline-block w-2 h-2 rounded-full flex-shrink-0"
-                :class="settingsStore.keys[p.value] ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'"
+                :class="settingsStore.keys[p.value] ? 'bg-green-500' : 'bg-gray-300'"
               />
-              <label class="text-sm text-gray-600 dark:text-gray-400 w-20 flex-shrink-0">
+              <label class="text-sm text-gray-600 w-20 flex-shrink-0">
                 {{ p.label }}
               </label>
               <input
@@ -160,12 +160,12 @@ function onKeydown(event: KeyboardEvent) {
                 :type="showKeys[p.value] ? 'text' : 'password'"
                 :value="settingsStore.keys[p.value] ?? ''"
                 :placeholder="`${p.label} API key`"
-                class="flex-1 border border-gray-300 dark:border-gray-600 rounded px-3 py-1.5 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                class="flex-1 border border-gray-300 rounded px-3 py-1.5 text-sm bg-white text-gray-900"
                 @input="onKeyInput(p.value, $event)"
               />
               <button
                 :data-testid="`key-toggle-${p.value}`"
-                class="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 flex-shrink-0"
+                class="text-xs text-gray-500 hover:text-gray-700 flex-shrink-0"
                 @click="toggleKeyVisibility(p.value)"
               >
                 {{ showKeys[p.value] ? 'Hide' : 'Show' }}
