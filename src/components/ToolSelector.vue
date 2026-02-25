@@ -3,43 +3,76 @@ import { TOOLS } from '@/tools/types'
 import { useToolStore } from '@/stores/tools'
 import { useSettingsStore } from '@/stores/settings'
 import { runTool } from '@/tools/runner'
+import type { ToolId } from '@/tools/types'
 
 const toolStore = useToolStore()
 const settingsStore = useSettingsStore()
 
-const analysisTools = TOOLS.filter((t) => t.category === 'analysis')
-const aiTools = TOOLS.filter((t) => t.category === 'ai')
+const allTools = [...TOOLS.filter((t) => t.category === 'analysis'), ...TOOLS.filter((t) => t.category === 'ai')]
 
-function isDisabled(tool: (typeof TOOLS)[number]): boolean {
+function activeDef() {
+  return TOOLS.find(t => t.id === toolStore.activeTool)
+}
+
+function isAiTool() {
+  return activeDef()?.category === 'ai'
+}
+
+function isRunDisabled(): boolean {
   if (toolStore.isRunning) return true
-  if (tool.category === 'ai' && !settingsStore.hasKeyForCurrentProvider) return true
+  if (!toolStore.activeTool) return true
+  if (isAiTool() && !settingsStore.hasKeyForCurrentProvider) return true
   return false
 }
 
-async function selectTool(tool: (typeof TOOLS)[number]) {
-  if (isDisabled(tool)) return
-  toolStore.setActiveTool(tool.id)
-  await runTool()
+function onSelect(event: Event) {
+  const id = (event.target as HTMLSelectElement).value as ToolId
+  toolStore.setActiveTool(id)
+  const tool = TOOLS.find(t => t.id === id)
+  if (tool && tool.category !== 'ai') {
+    runTool()
+  }
+}
+
+function onRun() {
+  if (!isRunDisabled()) {
+    runTool()
+  }
 }
 </script>
 
 <template>
-  <div class="tool-selector flex items-center gap-3 flex-wrap">
-    <button
-      v-for="tool in [...analysisTools, ...aiTools]"
-      :key="tool.id"
-      :disabled="isDisabled(tool)"
-      :title="tool.category === 'ai' && !settingsStore.hasKeyForCurrentProvider && !toolStore.isRunning ? 'Set API key in Settings' : undefined"
-      :class="[
-        'cursor-pointer rounded-full border px-3 py-1 text-sm shadow-sm transition whitespace-nowrap',
-        'disabled:cursor-not-allowed disabled:opacity-50',
-        toolStore.activeTool === tool.id
-          ? 'active border-blue-300 bg-blue-100 font-medium text-blue-900'
-          : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300 hover:bg-gray-100',
-      ]"
-      @click="selectTool(tool)"
+  <div class="tool-selector flex items-center gap-2">
+    <select
+      :value="toolStore.activeTool ?? ''"
+      :disabled="toolStore.isRunning"
+      class="flex-1 min-w-0 rounded border border-gray-200 bg-white px-2 py-1.5 text-sm text-gray-700 outline-none focus:border-blue-400 disabled:opacity-50"
+      @change="onSelect"
     >
-      {{ tool.label }}
+      <option value="" disabled>Select a tool...</option>
+      <optgroup label="Analysis">
+        <option v-for="tool in allTools.filter(t => t.category === 'analysis')" :key="tool.id" :value="tool.id">
+          {{ tool.label }}
+        </option>
+      </optgroup>
+      <optgroup label="AI">
+        <option
+          v-for="tool in allTools.filter(t => t.category === 'ai')"
+          :key="tool.id"
+          :value="tool.id"
+          :disabled="!settingsStore.hasKeyForCurrentProvider"
+        >
+          {{ tool.label }}
+        </option>
+      </optgroup>
+    </select>
+    <button
+      v-if="isAiTool()"
+      :disabled="isRunDisabled()"
+      class="shrink-0 cursor-pointer rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+      @click="onRun"
+    >
+      Analyze with AI
     </button>
   </div>
 </template>

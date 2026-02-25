@@ -38,7 +38,7 @@ function onRejectChunk(chunkId: string) {
 
 <template>
   <div class="results-pane flex h-full flex-col">
-    <div class="shrink-0 border-b border-gray-200 p-4">
+    <div class="shrink-0 p-4">
       <ToolSelector />
     </div>
     <div class="flex-1 overflow-y-auto p-4">

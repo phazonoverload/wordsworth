@@ -13,7 +13,6 @@ export const TOOLS: ToolDefinition[] = [
   { id: 'readability', label: 'Readability', category: 'analysis', description: 'Flesch-Kincaid, Gunning Fog, grade level, word count, reading time' },
   { id: 'style-check', label: 'Style Check', category: 'analysis', description: 'Passive voice, wordy phrases, inconsistent spelling & terminology' },
   { id: 'pronouns', label: 'Pronouns', category: 'analysis', description: 'Pronoun frequency, tone assessment' },
-  { id: 'cut-twenty', label: 'Cut 20%', category: 'ai', description: 'Trim text to ~80% length with diff review' },
   { id: 'promise-tracker', label: 'Promises', category: 'ai', description: 'Check if intro promises are delivered in conclusion' },
 ]
 

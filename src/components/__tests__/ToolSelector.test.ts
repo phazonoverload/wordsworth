@@ -17,93 +17,102 @@ describe('ToolSelector', () => {
     vi.clearAllMocks()
   })
 
-  it('renders all 5 tools as buttons', () => {
+  it('renders a select with all 4 tools as options', () => {
     const wrapper = mount(ToolSelector)
-    const buttons = wrapper.findAll('button')
-    expect(buttons).toHaveLength(5)
+    const options = wrapper.findAll('option').filter(o => o.text() !== 'Select a tool...')
+    expect(options).toHaveLength(4)
   })
 
-  it('displays tool labels', () => {
+  it('displays tool labels in select options', () => {
     const wrapper = mount(ToolSelector)
-    expect(wrapper.text()).toContain('Readability')
-    expect(wrapper.text()).toContain('Style Check')
-    expect(wrapper.text()).toContain('Pronouns')
-    expect(wrapper.text()).toContain('Cut 20%')
-    expect(wrapper.text()).toContain('Promises')
+    const text = wrapper.find('select').text()
+    expect(text).toContain('Readability')
+    expect(text).toContain('Style Check')
+    expect(text).toContain('Pronouns')
+    expect(text).toContain('Promises')
   })
 
-  it('calls setActiveTool and runTool when a tool is clicked', async () => {
+  it('calls setActiveTool and runTool when an analysis tool is selected', async () => {
     const wrapper = mount(ToolSelector)
     const store = useToolStore()
     const spy = vi.spyOn(store, 'setActiveTool')
 
-    const buttons = wrapper.findAll('button')
-    const readabilityBtn = buttons.find((b) => b.text().includes('Readability'))
-    await readabilityBtn!.trigger('click')
+    await wrapper.find('select').setValue('readability')
 
     expect(spy).toHaveBeenCalledWith('readability')
     expect(runTool).toHaveBeenCalled()
   })
 
-  it('highlights the active tool', () => {
+  it('sets the select value to the active tool', () => {
     const store = useToolStore()
     store.setActiveTool('style-check')
 
     const wrapper = mount(ToolSelector)
-    const buttons = wrapper.findAll('button')
-    const styleBtn = buttons.find((b) => b.text().includes('Style Check'))
-
-    expect(styleBtn!.classes()).toContain('active')
+    const select = wrapper.find('select').element as HTMLSelectElement
+    expect(select.value).toBe('style-check')
   })
 
-  it('disables all buttons when a tool is running', () => {
+  it('disables select when a tool is running', () => {
     const store = useToolStore()
     store.setRunning(true)
 
     const wrapper = mount(ToolSelector)
-    const buttons = wrapper.findAll('button')
-
-    for (const btn of buttons) {
-      expect(btn.attributes('disabled')).toBeDefined()
-    }
+    expect(wrapper.find('select').attributes('disabled')).toBeDefined()
   })
 
-  it('disables AI tools when no key for current provider', () => {
-    // Default provider is openai, no key set
+  it('disables AI tool options when no key for current provider', () => {
     const wrapper = mount(ToolSelector)
-    const buttons = wrapper.findAll('button')
-
-    const cutBtn = buttons.find((b) => b.text().includes('Cut 20%'))
-    const promisesBtn = buttons.find((b) => b.text().includes('Promises'))
-
-    expect(cutBtn!.attributes('disabled')).toBeDefined()
-    expect(promisesBtn!.attributes('disabled')).toBeDefined()
+    const promisesOption = wrapper.findAll('option').find(o => o.text() === 'Promises')
+    expect(promisesOption!.attributes('disabled')).toBeDefined()
   })
 
-  it('enables AI tools when key is set for current provider', () => {
+  it('enables AI tool options when key is set for current provider', () => {
     const settings = useSettingsStore()
     settings.setKey('openai', 'sk-test-key')
 
     const wrapper = mount(ToolSelector)
-    const buttons = wrapper.findAll('button')
-
-    const cutBtn = buttons.find((b) => b.text().includes('Cut 20%'))
-    const promisesBtn = buttons.find((b) => b.text().includes('Promises'))
-
-    expect(cutBtn!.attributes('disabled')).toBeUndefined()
-    expect(promisesBtn!.attributes('disabled')).toBeUndefined()
+    const promisesOption = wrapper.findAll('option').find(o => o.text() === 'Promises')
+    expect(promisesOption!.attributes('disabled')).toBeUndefined()
   })
 
-  it('analysis tools are always enabled (when not running)', () => {
+  it('shows Analyze with AI button when AI tool is selected', async () => {
+    const settings = useSettingsStore()
+    settings.setKey('openai', 'sk-test-key')
+    const store = useToolStore()
+    store.setActiveTool('promise-tracker')
+
     const wrapper = mount(ToolSelector)
-    const buttons = wrapper.findAll('button')
+    const btn = wrapper.find('button')
+    expect(btn.exists()).toBe(true)
+    expect(btn.text()).toBe('Analyze with AI')
+  })
 
-    const readabilityBtn = buttons.find((b) => b.text().includes('Readability'))
-    const styleBtn = buttons.find((b) => b.text().includes('Style Check'))
-    const pronounsBtn = buttons.find((b) => b.text().includes('Pronouns'))
+  it('does not show Analyze with AI button for analysis tools', () => {
+    const store = useToolStore()
+    store.setActiveTool('readability')
 
-    expect(readabilityBtn!.attributes('disabled')).toBeUndefined()
-    expect(styleBtn!.attributes('disabled')).toBeUndefined()
-    expect(pronounsBtn!.attributes('disabled')).toBeUndefined()
+    const wrapper = mount(ToolSelector)
+    expect(wrapper.find('button').exists()).toBe(false)
+  })
+
+  it('calls runTool when Analyze with AI button is clicked', async () => {
+    const settings = useSettingsStore()
+    settings.setKey('openai', 'sk-test-key')
+    const store = useToolStore()
+    store.setActiveTool('promise-tracker')
+
+    const wrapper = mount(ToolSelector)
+    await wrapper.find('button').trigger('click')
+    expect(runTool).toHaveBeenCalled()
+  })
+
+  it('does not call runTool when AI tool is selected from dropdown', async () => {
+    const settings = useSettingsStore()
+    settings.setKey('openai', 'sk-test-key')
+
+    const wrapper = mount(ToolSelector)
+    await wrapper.find('select').setValue('promise-tracker')
+
+    expect(runTool).not.toHaveBeenCalled()
   })
 })
