@@ -3,6 +3,7 @@ import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import StyleCheckResult from '../../results/StyleCheckResult.vue'
 import { useToolStore } from '@/stores/tools'
+import { useSettingsStore } from '@/stores/settings'
 import type { StyleCheckResult as StyleCheckResultType, StyleIssue } from '@/tools/types'
 
 function makeIssue(overrides: Partial<StyleIssue> = {}): StyleIssue {
@@ -27,6 +28,7 @@ function makeResult(issues: StyleIssue[] = []): StyleCheckResultType {
 
 describe('StyleCheckResult', () => {
   beforeEach(() => {
+    localStorage.clear()
     setActivePinia(createPinia())
   })
 
@@ -91,6 +93,7 @@ describe('StyleCheckResult', () => {
 
   it('calls setHighlightRange when an issue is clicked', async () => {
     const pinia = createPinia()
+    setActivePinia(pinia)
     const wrapper = mount(StyleCheckResult, {
       props: { result: makeResult([makeIssue({ absoluteOffset: 50, length: 12 })]) },
       global: { plugins: [pinia] },
@@ -98,7 +101,7 @@ describe('StyleCheckResult', () => {
     const store = useToolStore(pinia)
     const spy = vi.spyOn(store, 'setHighlightRange')
 
-    await wrapper.find('[data-testid="style-issue"]').trigger('click')
+    await wrapper.find('[data-testid="style-issue"] .cursor-pointer').trigger('click')
 
     expect(spy).toHaveBeenCalledWith({ from: 50, to: 62 })
   })
@@ -110,7 +113,65 @@ describe('StyleCheckResult', () => {
       global: { plugins: [pinia] },
     })
 
-    const issueEl = wrapper.find('[data-testid="style-issue"]')
-    expect(issueEl.classes()).toContain('cursor-pointer')
+    const clickableEl = wrapper.find('[data-testid="style-issue"] .cursor-pointer')
+    expect(clickableEl.exists()).toBe(true)
+  })
+
+  it('shows Fix All button when more than 1 issue and API key configured', () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const settings = useSettingsStore(pinia)
+    settings.setKey('openai', 'test-key')
+
+    const issues = [makeIssue(), makeIssue({ message: 'Another issue', line: 10, absoluteOffset: 100 })]
+    const wrapper = mount(StyleCheckResult, {
+      props: { result: makeResult(issues) },
+      global: { plugins: [pinia] },
+    })
+
+    expect(wrapper.find('[data-testid="fix-all-btn"]').exists()).toBe(true)
+  })
+
+  it('hides Fix All button when only 1 issue', () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const settings = useSettingsStore(pinia)
+    settings.setKey('openai', 'test-key')
+
+    const wrapper = mount(StyleCheckResult, {
+      props: { result: makeResult([makeIssue()]) },
+      global: { plugins: [pinia] },
+    })
+
+    expect(wrapper.find('[data-testid="fix-all-btn"]').exists()).toBe(false)
+  })
+
+  it('shows Fix with AI button on each issue when API key configured', () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const settings = useSettingsStore(pinia)
+    settings.setKey('openai', 'test-key')
+
+    const wrapper = mount(StyleCheckResult, {
+      props: { result: makeResult([makeIssue()]) },
+      global: { plugins: [pinia] },
+    })
+
+    expect(wrapper.find('[data-testid="fix-single-btn"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="fix-single-btn"]').text()).toBe('Fix with AI')
+  })
+
+  it('hides Fix buttons when no API key', () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+
+    const issues = [makeIssue(), makeIssue({ message: 'Another', line: 2, absoluteOffset: 20 })]
+    const wrapper = mount(StyleCheckResult, {
+      props: { result: makeResult(issues) },
+      global: { plugins: [pinia] },
+    })
+
+    expect(wrapper.find('[data-testid="fix-all-btn"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="fix-single-btn"]').exists()).toBe(false)
   })
 })
