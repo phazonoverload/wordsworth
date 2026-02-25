@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import type { CutResult as CutResultType } from '@/tools/types'
+import type { CutResult as CutResultType, DiffChunk } from '@/tools/types'
+import { useToolStore } from '@/stores/tools'
+import { useDocumentStore } from '@/stores/document'
 
 const props = defineProps<{
   result: CutResultType
@@ -9,6 +11,19 @@ const emit = defineEmits<{
   accept: [chunkId: string]
   reject: [chunkId: string]
 }>()
+
+const toolStore = useToolStore()
+const documentStore = useDocumentStore()
+
+function onHighlight(chunk: DiffChunk) {
+  const content = documentStore.content
+  const index = content.indexOf(chunk.original)
+  if (index === -1) return
+  toolStore.setHighlightRange({
+    from: index,
+    to: index + chunk.original.length,
+  })
+}
 </script>
 
 <template>
@@ -16,21 +31,21 @@ const emit = defineEmits<{
     <div class="grid grid-cols-3 gap-3 text-sm">
       <div class="rounded bg-gray-50 p-3">
         <div class="text-xs text-gray-500">Original</div>
-        <div class="text-lg font-medium">{{ props.result.originalWordCount }} words</div>
+        <div class="text-sm font-medium">{{ props.result.originalWordCount }} words</div>
       </div>
       <div class="rounded bg-gray-50 p-3">
         <div class="text-xs text-gray-500">Edited</div>
-        <div class="text-lg font-medium">{{ props.result.editedWordCount }} words</div>
+        <div class="text-sm font-medium">{{ props.result.editedWordCount }} words</div>
       </div>
-      <div class="rounded bg-green-50 p-3">
+      <div class="rounded bg-gray-50 p-3">
         <div class="text-xs text-gray-500">Reduction</div>
-        <div class="text-lg font-medium text-green-700">{{ props.result.reductionPercent }}%</div>
+        <div class="text-sm font-medium">{{ Math.round(props.result.reductionPercent) }}%</div>
       </div>
     </div>
 
     <div class="flex flex-col gap-3">
       <div
-        v-for="chunk in props.result.chunks"
+        v-for="chunk in props.result.chunks.filter(c => c.accepted === null)"
         :key="chunk.id"
         class="rounded border border-gray-200 p-3 text-sm"
       >
@@ -55,6 +70,13 @@ const emit = defineEmits<{
             @click="emit('reject', chunk.id)"
           >
             Reject
+          </button>
+          <button
+            :data-testid="`highlight-${chunk.id}`"
+            class="rounded bg-gray-200 px-3 py-1 text-xs text-gray-700 hover:bg-gray-300"
+            @click="onHighlight(chunk)"
+          >
+            Highlight
           </button>
         </div>
       </div>

@@ -1,6 +1,9 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { createPinia, setActivePinia } from 'pinia'
 import CutResult from '../../results/CutResult.vue'
+import { useToolStore } from '@/stores/tools'
+import { useDocumentStore } from '@/stores/document'
 import type { CutResult as CutResultType, DiffChunk } from '@/tools/types'
 
 function makeChunk(overrides: Partial<DiffChunk> = {}): DiffChunk {
@@ -25,6 +28,11 @@ function makeResult(chunks: DiffChunk[] = [makeChunk()]): CutResultType {
 }
 
 describe('CutResult', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    setActivePinia(createPinia())
+  })
+
   it('displays original word count', () => {
     const wrapper = mount(CutResult, { props: { result: makeResult() } })
     expect(wrapper.text()).toContain('100')
@@ -85,5 +93,27 @@ describe('CutResult', () => {
     const wrapper = mount(CutResult, { props: { result: makeResult(chunks) } })
     expect(wrapper.text()).toContain('First original')
     expect(wrapper.text()).toContain('Second original')
+  })
+
+  it('has a highlight button for each chunk', () => {
+    const wrapper = mount(CutResult, { props: { result: makeResult() } })
+    const highlightBtn = wrapper.find('[data-testid="highlight-chunk-1"]')
+    expect(highlightBtn.exists()).toBe(true)
+  })
+
+  it('sets highlight range when highlight button is clicked', async () => {
+    const documentStore = useDocumentStore()
+    const toolStore = useToolStore()
+    const original = 'This is the original text that is very wordy.'
+    documentStore.setContent(`Some preamble. ${original} Some epilogue.`)
+
+    const wrapper = mount(CutResult, { props: { result: makeResult() } })
+    await wrapper.find('[data-testid="highlight-chunk-1"]').trigger('click')
+
+    const expectedFrom = documentStore.content.indexOf(original)
+    expect(toolStore.highlightRange).toEqual({
+      from: expectedFrom,
+      to: expectedFrom + original.length,
+    })
   })
 })
