@@ -9,36 +9,22 @@ const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
 const settingsStore = useSettingsStore()
 
 const PROVIDERS = [
-  { value: 'openai' as const, label: 'OpenAI', models: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo'] },
-  { value: 'anthropic' as const, label: 'Anthropic', models: ['claude-sonnet-4-20250514', 'claude-haiku-4-20250514'] },
-  { value: 'google' as const, label: 'Google', models: ['gemini-2.5-flash', 'gemini-2.5-pro'] },
+  { value: 'openai' as const, label: 'OpenAI', model: 'gpt-5-nano' },
+  { value: 'anthropic' as const, label: 'Claude', model: 'claude-haiku-4-5' },
+  { value: 'google' as const, label: 'Gemini', model: 'gemini-2.5-flash' },
 ]
 
 const showKey = ref(false)
 
-const currentProviderLabel = computed(() => {
-  const found = PROVIDERS.find((p) => p.value === settingsStore.provider)
-  return found ? found.label : ''
-})
+const currentProvider = computed(() =>
+  PROVIDERS.find((p) => p.value === settingsStore.provider) ?? PROVIDERS[0]
+)
 
-const currentModels = computed(() => {
-  const found = PROVIDERS.find((p) => p.value === settingsStore.provider)
-  return found ? found.models : []
-})
+const currentModelName = computed(() => currentProvider.value.model)
 
-function onProviderChange(event: Event) {
-  const target = event.target as HTMLSelectElement
-  settingsStore.setProvider(target.value)
-  // Auto-select first model of the new provider
-  const found = PROVIDERS.find((p) => p.value === target.value)
-  if (found && found.models.length > 0) {
-    settingsStore.setModel(found.models[0] as string)
-  }
-}
-
-function onModelChange(event: Event) {
-  const target = event.target as HTMLSelectElement
-  settingsStore.setModel(target.value)
+function selectProvider(p: typeof PROVIDERS[number]) {
+  settingsStore.setProvider(p.value)
+  settingsStore.setModel(p.model)
 }
 
 function onKeyInput(providerId: ProviderId, event: Event) {
@@ -93,46 +79,30 @@ function onKeydown(event: KeyboardEvent) {
             </button>
           </div>
 
-          <!-- Provider selection -->
+          <!-- Provider selection (3-button toggle) -->
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              AI Provider
-            </label>
-            <select
+            <div
               data-testid="provider-select"
-              :value="settingsStore.provider"
-              class="w-full border border-gray-300 rounded px-3 py-2 bg-white text-gray-900"
-              @change="onProviderChange"
+              class="inline-flex w-full rounded-lg border border-gray-200 bg-gray-100 p-0.5"
             >
-              <option
+              <button
                 v-for="p in PROVIDERS"
                 :key="p.value"
-                :value="p.value"
+                :data-testid="`provider-btn-${p.value}`"
+                :class="[
+                  'flex-1 rounded-md px-4 py-2 text-sm font-medium transition-all',
+                  settingsStore.provider === p.value
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700',
+                ]"
+                @click="selectProvider(p)"
               >
                 {{ p.label }}
-              </option>
-            </select>
-          </div>
-
-          <!-- Model selection -->
-          <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Model
-            </label>
-            <select
-              data-testid="model-select"
-              :value="settingsStore.model"
-              class="w-full border border-gray-300 rounded px-3 py-2 bg-white text-gray-900"
-              @change="onModelChange"
-            >
-              <option
-                v-for="m in currentModels"
-                :key="m"
-                :value="m"
-              >
-                {{ m }}
-              </option>
-            </select>
+              </button>
+            </div>
+            <p class="mt-3 text-sm text-gray-600">
+              Wordsworth will use <span class="font-medium text-gray-900">{{ currentModelName }}</span>
+            </p>
           </div>
 
           <!-- API Key for current provider -->
@@ -144,14 +114,11 @@ function onKeydown(event: KeyboardEvent) {
                 class="inline-block w-2 h-2 rounded-full flex-shrink-0"
                 :class="settingsStore.hasKeyForCurrentProvider ? 'bg-green-500' : 'bg-gray-300'"
               />
-              <label class="text-sm text-gray-600 flex-shrink-0">
-                {{ currentProviderLabel }}
-              </label>
               <input
                 data-testid="key-input"
                 :type="showKey ? 'text' : 'password'"
                 :value="settingsStore.keys[settingsStore.provider as ProviderId] ?? ''"
-                :placeholder="`${currentProviderLabel} API key`"
+                :placeholder="`${currentProvider.label} API key`"
                 class="flex-1 border border-gray-300 rounded px-3 py-1.5 text-sm bg-white text-gray-900"
                 @input="onKeyInput(settingsStore.provider as ProviderId, $event)"
               />

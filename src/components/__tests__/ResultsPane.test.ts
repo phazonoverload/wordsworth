@@ -3,6 +3,7 @@ import { shallowMount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import ResultsPane from '../ResultsPane.vue'
 import { useToolStore } from '@/stores/tools'
+import { useSettingsStore } from '@/stores/settings'
 import type {
   ReadabilityResult,
   StyleCheckResult,
@@ -22,12 +23,21 @@ describe('ResultsPane', () => {
     setActivePinia(createPinia())
   })
 
-  it('shows placeholder message when no result', () => {
+  it('shows configure AI message when no API key is set and no tool selected', () => {
+    const wrapper = shallowMount(ResultsPane)
+    expect(wrapper.text()).toContain('Please configure AI in the settings before using tools')
+  })
+
+  it('shows placeholder message when no result but API key is set', () => {
+    const settings = useSettingsStore()
+    settings.setKey('openai', 'sk-test')
     const wrapper = shallowMount(ResultsPane)
     expect(wrapper.text()).toContain('Select a tool and run it to see results')
   })
 
   it('shows loading state when running', () => {
+    const settings = useSettingsStore()
+    settings.setKey('openai', 'sk-test')
     const store = useToolStore()
     store.setRunning(true)
     const wrapper = shallowMount(ResultsPane)

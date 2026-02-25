@@ -39,38 +39,33 @@ describe('SettingsModal', () => {
     expect(wrapper.find('[data-testid="key-input-google"]').exists()).toBe(false)
   })
 
-  it('renders a provider selection dropdown', () => {
+  it('renders provider toggle buttons', () => {
     const wrapper = mountModal()
     const select = wrapper.find('[data-testid="provider-select"]')
     expect(select.exists()).toBe(true)
-    const options = select.findAll('option')
-    const values = options.map((o) => o.element.value)
-    expect(values).toContain('openai')
-    expect(values).toContain('anthropic')
-    expect(values).toContain('google')
+    expect(wrapper.find('[data-testid="provider-btn-openai"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="provider-btn-anthropic"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="provider-btn-google"]').exists()).toBe(true)
   })
 
-  it('updates the store when provider is changed', async () => {
+  it('updates the store when provider button is clicked', async () => {
     const wrapper = mountModal()
     const store = useSettingsStore()
-    const spy = vi.spyOn(store, 'setProvider')
-    const select = wrapper.find('[data-testid="provider-select"]')
-    await select.setValue('anthropic')
-    expect(spy).toHaveBeenCalledWith('anthropic')
+    const providerSpy = vi.spyOn(store, 'setProvider')
+    const modelSpy = vi.spyOn(store, 'setModel')
+    await wrapper.find('[data-testid="provider-btn-anthropic"]').trigger('click')
+    expect(providerSpy).toHaveBeenCalledWith('anthropic')
+    expect(modelSpy).toHaveBeenCalledWith('claude-haiku-4-5')
   })
 
-  it('renders a model selection dropdown that updates with provider', async () => {
+  it('shows model name for selected provider', async () => {
     const wrapper = mountModal()
-    const modelSelect = wrapper.find('[data-testid="model-select"]')
-    expect(modelSelect.exists()).toBe(true)
-    let options = modelSelect.findAll('option')
-    let values = options.map((o) => o.element.value)
-    expect(values).toContain('gpt-4o')
-    const providerSelect = wrapper.find('[data-testid="provider-select"]')
-    await providerSelect.setValue('anthropic')
-    const updatedOptions = wrapper.find('[data-testid="model-select"]').findAll('option')
-    const updatedValues = updatedOptions.map((o) => o.element.value)
-    expect(updatedValues).toContain('claude-sonnet-4-20250514')
+    // Default is OpenAI -> gpt-5-nano
+    expect(wrapper.text()).toContain('gpt-5-nano')
+    // Switch to anthropic
+    await wrapper.find('[data-testid="provider-btn-anthropic"]').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('claude-haiku-4-5')
   })
 
   it('calls settingsStore.setKey with current provider when entering an API key', async () => {
@@ -87,9 +82,9 @@ describe('SettingsModal', () => {
     store.setKey('anthropic', 'sk-ant-key')
     const wrapper = mountModal()
 
-    // Switch to anthropic
-    const providerSelect = wrapper.find('[data-testid="provider-select"]')
-    await providerSelect.setValue('anthropic')
+    // Switch to anthropic via button click
+    await wrapper.find('[data-testid="provider-btn-anthropic"]').trigger('click')
+    await wrapper.vm.$nextTick()
 
     const input = wrapper.find('[data-testid="key-input"]')
     expect((input.element as HTMLInputElement).value).toBe('sk-ant-key')
@@ -134,13 +129,12 @@ describe('SettingsModal', () => {
     expect(indicator.classes()).toContain('bg-gray-300')
   })
 
-  it('calls settingsStore.setModel when model is changed', async () => {
+  it('calls settingsStore.setModel when provider button is clicked', async () => {
     const wrapper = mountModal()
     const store = useSettingsStore()
     const spy = vi.spyOn(store, 'setModel')
-    const modelSelect = wrapper.find('[data-testid="model-select"]')
-    await modelSelect.setValue('gpt-4o')
-    expect(spy).toHaveBeenCalledWith('gpt-4o')
+    await wrapper.find('[data-testid="provider-btn-google"]').trigger('click')
+    expect(spy).toHaveBeenCalledWith('gemini-2.5-flash')
   })
 
   it('displays current provider label near key input', () => {

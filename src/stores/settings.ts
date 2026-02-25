@@ -16,7 +16,7 @@ export const useSettingsStore = defineStore('settings', () => {
 
   const keys = ref<ApiKeys>(savedKeys ?? {})
   const provider = ref(savedSettings?.provider ?? 'openai')
-  const model = ref(savedSettings?.model ?? 'gpt-4o-mini')
+  const model = ref(savedSettings?.model ?? 'gpt-5-nano')
 
   const hasAnyKey = computed(() =>
     Object.values(keys.value).some((k) => k && k.length > 0)

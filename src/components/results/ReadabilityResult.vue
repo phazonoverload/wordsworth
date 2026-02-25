@@ -15,8 +15,6 @@ function gradeColor(level: number): string {
 
 <template>
   <div class="flex flex-col gap-4">
-    <ReaderContext />
-
     <div class="flex items-center gap-3">
       <span
         data-testid="grade-indicator"
@@ -47,6 +45,8 @@ function gradeColor(level: number): string {
         <div class="text-lg font-medium">{{ props.result.readingTimeMinutes }} min</div>
       </div>
     </div>
+
+    <ReaderContext />
 
     <div class="rounded bg-blue-50 p-3 text-sm text-blue-800">
       {{ props.result.audienceNote }}
