@@ -1,6 +1,6 @@
 import { useSettingsStore } from '@/stores/settings'
 
-export type ActionId = 'cut-twenty' | 'fix-single' | 'fix-all' | 'promise-tracker'
+export type ActionId = 'cut-twenty' | 'fix-single' | 'fix-all' | 'promise-tracker' | 'audience-assessment'
 
 export interface CallAIParams {
   action: ActionId

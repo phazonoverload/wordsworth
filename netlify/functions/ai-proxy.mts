@@ -51,6 +51,9 @@ const SCHEMAS = {
       })
     ),
   }),
+  "audience-assessment": z.object({
+    assessment: z.string().describe("A one-paragraph assessment of whether the writing is well-suited for the target audience, considering domain-appropriate jargon, sentence complexity, and assumed knowledge"),
+  }),
 } as const
 
 type ActionId = keyof typeof SCHEMAS
