@@ -16,7 +16,7 @@ The grade level is displayed with a color-coded indicator -- green for grade 8 a
 
 Below the metrics, you can select a target audience from presets (Senior developers, Junior developers, Non-technical stakeholders, General audience) or write your own custom description. If you have an AI API key configured, an "Assess for audience with AI" button sends your document and audience description to an LLM, which returns a one-paragraph verdict on whether your jargon level, sentence complexity, and assumed knowledge are appropriate. The assessment considers context -- it won't penalise technical terminology when writing for a technical audience.
 
-<img src="docs/images/readability.png" alt="Readability tool showing grade level, metrics, target audience selector, and AI assessment" width="360">
+<img src="docs/images/readability.png" alt="Readability tool showing grade level, metrics, target audience selector, and AI assessment">
 
 ### Style Check
 
@@ -28,7 +28,7 @@ Scans your prose for three categories of style issues:
 
 Each issue shows the line number, the flagged text, and a suggestion. Clicking an issue highlights the relevant line in the editor. If you have an AI API key configured, you can fix individual issues or all issues at once -- the AI rewrites the affected text and presents a diff for you to review and accept before anything changes.
 
-<img src="docs/images/style-check.png" alt="Style Check tool showing inconsistency detection with editor highlighting" width="680">
+<img src="docs/images/style-check.png" alt="Style Check tool showing inconsistency detection with editor highlighting">
 
 ### Pronouns
 
@@ -38,7 +38,7 @@ All pronoun matches are highlighted inline in the editor with color-coded marker
 
 Technical documentation generally benefits from a reader-focused "you" voice. This tool makes the balance visible without you having to count anything.
 
-<img src="docs/images/pronouns.png" alt="Pronouns tool showing tone assessment, pronoun counts, and inline editor highlighting" width="680">
+<img src="docs/images/pronouns.png" alt="Pronouns tool showing tone assessment, pronoun counts, and inline editor highlighting">
 
 ### Header Shift
 
@@ -46,7 +46,7 @@ Bulk-shifts all Markdown header levels up or down by one. Promote turns every H2
 
 This is useful when embedding content into a larger site where the page title occupies H1, so your document headings need to drop a level. The tool shows a breakdown of how many headers exist at each level (H1-H6), blocks unsafe operations (promoting when an H1 already exists, demoting when an H6 exists), and provides an undo button to revert the last shift.
 
-<img src="docs/images/header-shift.png" alt="Header Shift tool showing header counts and promote/demote buttons" width="360">
+<img src="docs/images/header-shift.png" alt="Header Shift tool showing header counts and promote/demote buttons">
 
 ## Running locally
 
