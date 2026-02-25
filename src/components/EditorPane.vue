@@ -6,9 +6,39 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useDocumentStore } from '@/stores/document'
 import { useToolStore } from '@/stores/tools'
-import { EditorState } from '@codemirror/state'
-import { EditorView, lineNumbers, placeholder } from '@codemirror/view'
+import { EditorState, StateField, StateEffect, RangeSet } from '@codemirror/state'
+import { EditorView, Decoration, lineNumbers, placeholder } from '@codemirror/view'
 import { markdown } from '@codemirror/lang-markdown'
+
+const setHighlightEffect = StateEffect.define<{ from: number; to: number } | null>()
+
+const highlightLineDecoration = Decoration.line({ class: 'cm-highlighted-line' })
+
+const highlightField = StateField.define<RangeSet<Decoration>>({
+  create() {
+    return RangeSet.empty
+  },
+  update(decorations, tr) {
+    for (const effect of tr.effects) {
+      if (effect.is(setHighlightEffect)) {
+        if (!effect.value) return RangeSet.empty
+        const { from, to } = effect.value
+        const doc = tr.state.doc
+        const startLine = doc.lineAt(Math.min(from, doc.length))
+        const endLine = doc.lineAt(Math.min(to, doc.length))
+        const lineDecos: { from: number }[] = []
+        for (let ln = startLine.number; ln <= endLine.number; ln++) {
+          lineDecos.push({ from: doc.line(ln).from })
+        }
+        return RangeSet.of(lineDecos.map(l => highlightLineDecoration.range(l.from)))
+      }
+    }
+    // Clear decorations on any document change (user editing)
+    if (tr.docChanged) return RangeSet.empty
+    return decorations
+  },
+  provide: (field) => EditorView.decorations.from(field),
+})
 
 const editorRef = ref<HTMLDivElement>()
 const documentStore = useDocumentStore()
@@ -38,8 +68,8 @@ const theme = EditorView.theme({
     backgroundColor: 'transparent',
     border: 'none',
   },
-  '&.cm-focused .cm-selectionBackground, .cm-selectionBackground': {
-    backgroundColor: '#fef08a !important',
+  '.cm-highlighted-line': {
+    backgroundColor: '#fef9c3',
   },
 })
 
@@ -67,6 +97,7 @@ onMounted(() => {
       EditorView.lineWrapping,
       theme,
       updateListener,
+      highlightField,
       placeholder('Paste markdown here'),
     ],
   })
@@ -110,12 +141,17 @@ watch(
   () => toolStore.highlightRange,
   (range) => {
     if (!view) return
-    if (!range) return
+    if (!range) {
+      view.dispatch({ effects: setHighlightEffect.of(null) })
+      return
+    }
     const from = Math.min(range.from, view.state.doc.length)
     const to = Math.min(range.to, view.state.doc.length)
     view.dispatch({
-      selection: { anchor: from, head: to },
-      scrollIntoView: true,
+      effects: [
+        setHighlightEffect.of({ from, to }),
+        EditorView.scrollIntoView(from, { y: 'center' }),
+      ],
     })
   },
 )

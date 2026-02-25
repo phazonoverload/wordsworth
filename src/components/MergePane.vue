@@ -19,16 +19,16 @@
         Accept
       </button>
     </div>
-    <!-- Merge editor -->
+    <!-- Unified merge editor -->
     <div ref="mergeRef" class="flex-1 overflow-hidden"></div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { EditorView } from '@codemirror/view'
 import { EditorState } from '@codemirror/state'
-import { MergeView } from '@codemirror/merge'
+import { unifiedMergeView, getChunks } from '@codemirror/merge'
 import { markdown } from '@codemirror/lang-markdown'
 import { useToolStore } from '@/stores/tools'
 import { useDocumentStore } from '@/stores/document'
@@ -37,7 +37,7 @@ const toolStore = useToolStore()
 const documentStore = useDocumentStore()
 
 const mergeRef = ref<HTMLDivElement>()
-let mergeView: MergeView | null = null
+let editorView: EditorView | null = null
 
 const theme = EditorView.theme({
   '&': { height: '100%', fontSize: '14px' },
@@ -49,28 +49,65 @@ const theme = EditorView.theme({
   '&.cm-focused': { outline: 'none' },
 })
 
-onMounted(() => {
+function createEditor() {
+  destroyEditor()
   if (!mergeRef.value) return
   if (!toolStore.mergeOriginal || !toolStore.mergeModified) return
 
-  mergeView = new MergeView({
-    parent: mergeRef.value,
-    a: {
-      doc: toolStore.mergeOriginal,
-      extensions: [markdown(), EditorState.readOnly.of(true), theme, EditorView.lineWrapping],
-    },
-    b: {
+  editorView = new EditorView({
+    state: EditorState.create({
       doc: toolStore.mergeModified,
-      extensions: [markdown(), EditorState.readOnly.of(true), theme, EditorView.lineWrapping],
-    },
+      extensions: [
+        markdown(),
+        EditorState.readOnly.of(true),
+        theme,
+        EditorView.lineWrapping,
+        unifiedMergeView({
+          original: toolStore.mergeOriginal,
+          highlightChanges: true,
+          gutter: true,
+          mergeControls: false,
+        }),
+      ],
+    }),
+    parent: mergeRef.value,
   })
+
+  // Snap scroll to the first changed chunk so the diff is immediately visible
+  const result = getChunks(editorView.state)
+  if (result && result.chunks.length > 0) {
+    editorView.dispatch({
+      effects: EditorView.scrollIntoView(result.chunks[0]!.fromB, { y: 'center' }),
+    })
+  }
+}
+
+function destroyEditor() {
+  if (editorView) {
+    editorView.destroy()
+    editorView = null
+  }
+}
+
+onMounted(() => {
+  createEditor()
 })
 
+// Watch merge state so back-to-back fixes work: whenever new merge data
+// arrives we tear down the old editor and create a fresh one.
+watch(
+  () => [toolStore.mergeOriginal, toolStore.mergeModified] as const,
+  ([original, modified]) => {
+    if (original && modified) {
+      createEditor()
+    } else {
+      destroyEditor()
+    }
+  },
+)
+
 onUnmounted(() => {
-  if (mergeView) {
-    mergeView.destroy()
-    mergeView = null
-  }
+  destroyEditor()
 })
 
 function onAccept() {

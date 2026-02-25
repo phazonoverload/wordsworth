@@ -1,8 +1,25 @@
 /**
+ * Replace fenced code blocks and inline code with spaces of equal length.
+ * Preserves string length so that character positions remain valid.
+ */
+export function maskCodeBlocks(text: string): string {
+  // Fenced code blocks: ```...``` (with optional language tag)
+  let result = text.replace(/^```[^\n]*\n[\s\S]*?^```/gm, (match) => {
+    return match.replace(/[^\n]/g, ' ')
+  })
+  // Inline code: `...` (single backtick, not inside fenced blocks — already masked above)
+  result = result.replace(/`([^`]+)`/g, (match) => {
+    return match.replace(/[^\n]/g, ' ')
+  })
+  return result
+}
+
+/**
  * Strip common markdown syntax for plain-text analysis.
  */
 export function stripMarkdown(text: string): string {
   return text
+    .replace(/^```[^\n]*\n[\s\S]*?^```/gm, '') // fenced code blocks
     .replace(/^#{1,6}\s+/gm, '')       // headings
     .replace(/\*\*(.+?)\*\*/g, '$1')   // bold
     .replace(/\*(.+?)\*/g, '$1')       // italic

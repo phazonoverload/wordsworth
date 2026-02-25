@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { countWords, countSentences, countSyllables, splitIntoSentences } from '@/lib/text-utils'
+import { countWords, countSentences, countSyllables, splitIntoSentences, maskCodeBlocks } from '@/lib/text-utils'
 
 describe('countWords', () => {
   it('counts words in a simple sentence', () => {
@@ -63,5 +63,52 @@ describe('splitIntoSentences', () => {
   it('returns whole text if no sentence enders', () => {
     const sentences = splitIntoSentences('hello world')
     expect(sentences).toHaveLength(1)
+  })
+})
+
+describe('maskCodeBlocks', () => {
+  it('masks fenced code block content with spaces', () => {
+    const text = 'Hello\n```js\nconst x = 1\n```\nWorld'
+    const result = maskCodeBlocks(text)
+    expect(result.length).toBe(text.length)
+    expect(result).toContain('Hello')
+    expect(result).toContain('World')
+    expect(result).not.toContain('const')
+  })
+
+  it('preserves newlines inside fenced code blocks', () => {
+    const text = 'A\n```\nline1\nline2\n```\nB'
+    const result = maskCodeBlocks(text)
+    expect(result.split('\n').length).toBe(text.split('\n').length)
+  })
+
+  it('masks inline code', () => {
+    const text = 'Use `wasBuilt` in your code.'
+    const result = maskCodeBlocks(text)
+    expect(result.length).toBe(text.length)
+    expect(result).not.toContain('wasBuilt')
+  })
+
+  it('returns text unchanged when no code blocks are present', () => {
+    const text = 'Just plain prose here.'
+    expect(maskCodeBlocks(text)).toBe(text)
+  })
+
+  it('handles multiple fenced code blocks', () => {
+    const text = 'A\n```\nfoo\n```\nB\n```\nbar\n```\nC'
+    const result = maskCodeBlocks(text)
+    expect(result.length).toBe(text.length)
+    expect(result).toContain('A')
+    expect(result).toContain('B')
+    expect(result).toContain('C')
+    expect(result).not.toContain('foo')
+    expect(result).not.toContain('bar')
+  })
+})
+
+describe('countWords', () => {
+  it('excludes fenced code blocks from word count', () => {
+    const text = 'Hello world.\n```\nconst x = 1\n```\nGoodbye world.'
+    expect(countWords(text)).toBe(4)
   })
 })

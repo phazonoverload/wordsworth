@@ -4,7 +4,7 @@ import { useToolStore } from '@/stores/tools'
 import { useDocumentStore } from '@/stores/document'
 import { useSettingsStore } from '@/stores/settings'
 import { fixSingleIssue, fixAllIssues } from '@/tools/style-fix'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 const props = defineProps<{
   result: StyleCheckResultType
@@ -16,6 +16,8 @@ const settingsStore = useSettingsStore()
 
 const fixingIssueKey = ref<string | null>(null)
 const fixingAll = ref(false)
+const isMergeActive = computed(() => !!(toolStore.mergeOriginal && toolStore.mergeModified))
+const isFixing = computed(() => fixingIssueKey.value !== null || fixingAll.value)
 
 function severityClasses(severity: 'warning' | 'info'): string {
   return severity === 'warning'
@@ -28,6 +30,7 @@ function issueKey(issue: StyleIssue): string {
 }
 
 function onIssueClick(issue: StyleIssue) {
+  if (isMergeActive.value) return
   toolStore.setHighlightRange({ from: issue.absoluteOffset, to: issue.absoluteOffset + issue.length })
 }
 
@@ -77,12 +80,16 @@ async function onFixAll() {
         <button
           v-if="props.result.issues.length > 1 && settingsStore.hasKeyForCurrentProvider"
           data-testid="fix-all-btn"
-          :disabled="fixingAll"
+          :disabled="fixingAll || isMergeActive || isFixing"
           class="rounded bg-violet-600 px-3 py-1 text-xs font-medium text-white hover:bg-violet-700 transition-colors disabled:opacity-50"
           @click="onFixAll"
         >
           {{ fixingAll ? 'Fixing...' : 'Fix All with AI' }}
         </button>
+      </div>
+
+      <div v-if="isMergeActive" class="rounded bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-700">
+        Review the pending suggestion before fixing another issue.
       </div>
 
       <div class="flex flex-col gap-2">
@@ -93,7 +100,7 @@ async function onFixAll() {
           class="rounded border border-gray-200 text-sm transition-colors"
         >
           <div
-            class="cursor-pointer p-3 hover:bg-blue-50 transition-colors"
+            :class="['p-3 transition-colors', isMergeActive ? 'opacity-60' : 'cursor-pointer hover:bg-blue-50']"
             @click="onIssueClick(issue)"
           >
             <div class="mb-1 flex items-center gap-2">
@@ -119,7 +126,7 @@ async function onFixAll() {
           >
             <button
               data-testid="fix-single-btn"
-              :disabled="fixingIssueKey === issueKey(issue)"
+              :disabled="fixingIssueKey === issueKey(issue) || isMergeActive || isFixing"
               class="text-xs font-medium text-violet-600 hover:text-violet-800 transition-colors disabled:opacity-50"
               @click.stop="onFixSingle(issue)"
             >

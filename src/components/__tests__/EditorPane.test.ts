@@ -15,6 +15,18 @@ vi.mock('@codemirror/state', () => ({
   EditorState: {
     create: vi.fn(() => ({})),
   },
+  StateField: {
+    define: vi.fn(() => []),
+  },
+  StateEffect: {
+    define: vi.fn(() => ({
+      of: vi.fn((value: unknown) => ({ type: 'setHighlightEffect', value })),
+    })),
+  },
+  RangeSet: {
+    empty: [],
+    of: vi.fn(() => []),
+  },
 }))
 
 vi.mock('@codemirror/view', () => ({
@@ -25,11 +37,16 @@ vi.mock('@codemirror/view', () => ({
       updateListener: { of: vi.fn(() => []) },
       lineWrapping: [],
       scrollIntoView: vi.fn(() => ({})),
+      decorations: { from: vi.fn(() => []) },
     },
   ),
+  Decoration: {
+    line: vi.fn(() => ({ range: vi.fn(() => ({})) })),
+  },
   keymap: { of: vi.fn(() => []) },
   lineWrapping: [],
   lineNumbers: vi.fn(() => []),
+  placeholder: vi.fn(() => []),
 }))
 
 vi.mock('@codemirror/lang-markdown', () => ({
@@ -92,7 +109,7 @@ describe('EditorPane', () => {
     expect(lineNumbers).toHaveBeenCalled()
   })
 
-  it('dispatches selection when highlightRange changes', async () => {
+  it('dispatches highlight effect when highlightRange changes', async () => {
     // Set doc length so clamping doesn't zero out values
     mockView.state.doc.length = 100
     mount(EditorPane)
@@ -102,10 +119,13 @@ describe('EditorPane', () => {
     toolStore.setHighlightRange({ from: 5, to: 15 })
     await nextTick()
 
-    expect(mockDispatch).toHaveBeenCalledWith({
-      selection: { anchor: 5, head: 15 },
-      scrollIntoView: true,
-    })
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        effects: expect.anything(),
+      }),
+    )
+    // Should use EditorView.scrollIntoView for snap scroll
+    expect(EditorView.scrollIntoView).toHaveBeenCalledWith(5, { y: 'center' })
   })
 
   it('clamps highlight range to document length', async () => {
@@ -113,17 +133,20 @@ describe('EditorPane', () => {
     const toolStore = useToolStore()
 
     mockDispatch.mockClear()
-    // doc.length is 0 in mock, so both should clamp to 0
+    // doc.length is 0 in mock, so dispatch still happens with clamped values
     toolStore.setHighlightRange({ from: 100, to: 200 })
     await nextTick()
 
-    expect(mockDispatch).toHaveBeenCalledWith({
-      selection: { anchor: 0, head: 0 },
-      scrollIntoView: true,
-    })
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        effects: expect.anything(),
+      }),
+    )
+    // Clamped to 0 since doc.length is 0
+    expect(EditorView.scrollIntoView).toHaveBeenCalledWith(0, { y: 'center' })
   })
 
-  it('does not dispatch when highlightRange is cleared', async () => {
+  it('dispatches clear effect when highlightRange is cleared', async () => {
     mount(EditorPane)
     const toolStore = useToolStore()
 
@@ -134,6 +157,10 @@ describe('EditorPane', () => {
     toolStore.clearHighlightRange()
     await nextTick()
 
-    expect(mockDispatch).not.toHaveBeenCalled()
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        effects: expect.anything(),
+      }),
+    )
   })
 })

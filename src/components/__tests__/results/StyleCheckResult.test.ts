@@ -38,7 +38,7 @@ describe('StyleCheckResult', () => {
   })
 
   it('shows issue count', () => {
-    const issues = [makeIssue(), makeIssue({ message: 'Jargon detected', category: 'jargon' })]
+    const issues = [makeIssue(), makeIssue({ message: 'Inconsistency detected', category: 'inconsistency' })]
     const wrapper = mount(StyleCheckResult, { props: { result: makeResult(issues) } })
     expect(wrapper.text()).toContain('2')
   })
@@ -52,9 +52,9 @@ describe('StyleCheckResult', () => {
 
   it('displays issue category', () => {
     const wrapper = mount(StyleCheckResult, {
-      props: { result: makeResult([makeIssue({ category: 'jargon' })]) },
+      props: { result: makeResult([makeIssue({ category: 'inconsistency' })]) },
     })
-    expect(wrapper.text()).toContain('jargon')
+    expect(wrapper.text()).toContain('inconsistency')
   })
 
   it('displays line number', () => {
@@ -173,5 +173,86 @@ describe('StyleCheckResult', () => {
 
     expect(wrapper.find('[data-testid="fix-all-btn"]').exists()).toBe(false)
     expect(wrapper.find('[data-testid="fix-single-btn"]').exists()).toBe(false)
+  })
+
+  it('does not call setHighlightRange when merge is active', async () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const toolStore = useToolStore(pinia)
+    toolStore.setMergeState('original', 'modified')
+
+    const wrapper = mount(StyleCheckResult, {
+      props: { result: makeResult([makeIssue({ absoluteOffset: 50, length: 12 })]) },
+      global: { plugins: [pinia] },
+    })
+    const spy = vi.spyOn(toolStore, 'setHighlightRange')
+
+    await wrapper.find('[data-testid="style-issue"] div').trigger('click')
+
+    expect(spy).not.toHaveBeenCalled()
+  })
+
+  it('disables Fix with AI button when merge is active', () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const settings = useSettingsStore(pinia)
+    settings.setKey('openai', 'test-key')
+    const toolStore = useToolStore(pinia)
+    toolStore.setMergeState('original', 'modified')
+
+    const wrapper = mount(StyleCheckResult, {
+      props: { result: makeResult([makeIssue()]) },
+      global: { plugins: [pinia] },
+    })
+
+    const btn = wrapper.find('[data-testid="fix-single-btn"]')
+    expect(btn.attributes('disabled')).toBeDefined()
+  })
+
+  it('disables Fix All button when merge is active', () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const settings = useSettingsStore(pinia)
+    settings.setKey('openai', 'test-key')
+    const toolStore = useToolStore(pinia)
+    toolStore.setMergeState('original', 'modified')
+
+    const issues = [makeIssue(), makeIssue({ message: 'Another', line: 10, absoluteOffset: 100 })]
+    const wrapper = mount(StyleCheckResult, {
+      props: { result: makeResult(issues) },
+      global: { plugins: [pinia] },
+    })
+
+    const btn = wrapper.find('[data-testid="fix-all-btn"]')
+    expect(btn.attributes('disabled')).toBeDefined()
+  })
+
+  it('shows review message when merge is active', () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const toolStore = useToolStore(pinia)
+    toolStore.setMergeState('original', 'modified')
+
+    const wrapper = mount(StyleCheckResult, {
+      props: { result: makeResult([makeIssue()]) },
+      global: { plugins: [pinia] },
+    })
+
+    expect(wrapper.text()).toContain('Review the pending suggestion')
+  })
+
+  it('removes cursor-pointer class when merge is active', () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const toolStore = useToolStore(pinia)
+    toolStore.setMergeState('original', 'modified')
+
+    const wrapper = mount(StyleCheckResult, {
+      props: { result: makeResult([makeIssue()]) },
+      global: { plugins: [pinia] },
+    })
+
+    const clickableEl = wrapper.find('[data-testid="style-issue"] .cursor-pointer')
+    expect(clickableEl.exists()).toBe(false)
   })
 })
