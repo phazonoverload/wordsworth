@@ -24,7 +24,7 @@ export async function runTool(): Promise<void> {
 
     switch (toolStore.activeTool) {
       case 'readability':
-        result = analyzeReadability(content, readerContext)
+        result = analyzeReadability(content)
         break
       case 'style-check':
         result = checkStyle(content, readerContext)

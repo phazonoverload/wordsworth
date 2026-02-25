@@ -12,7 +12,6 @@ vi.mock('@/tools/readability', () => ({
     wordCount: 50,
     sentenceCount: 3,
     readingTimeMinutes: 0.2,
-    audienceNote: 'Test note',
   })),
 }))
 
@@ -99,7 +98,7 @@ describe('runTool', () => {
 
     await runTool()
 
-    expect(analyzeReadability).toHaveBeenCalledWith('The cat sat on the mat.', 'general audience')
+    expect(analyzeReadability).toHaveBeenCalledWith('The cat sat on the mat.')
     expect(toolStore.result).not.toBeNull()
     expect(toolStore.result!.type).toBe('readability')
   })
@@ -176,7 +175,6 @@ describe('runTool', () => {
         wordCount: 50,
         sentenceCount: 3,
         readingTimeMinutes: 0.2,
-        audienceNote: 'Test note',
       }
     })
 

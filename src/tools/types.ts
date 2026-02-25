@@ -24,7 +24,6 @@ export interface ReadabilityResult {
   wordCount: number
   sentenceCount: number
   readingTimeMinutes: number
-  audienceNote: string
 }
 
 export interface StyleIssue {
