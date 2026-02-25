@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { storage } from '@/lib/storage'
-import type { ToolId, ToolResult, ToolRun } from '@/tools/types'
+import type { ToolId, ToolResult, ToolRun, PronounMatch } from '@/tools/types'
 
 export type HighlightRange = { from: number; to: number }
 
@@ -15,6 +15,7 @@ export const useToolStore = defineStore('tools', () => {
   const result = ref<ToolResult | null>(null)
   const history = ref<ToolRun[]>(savedHistory ?? [])
   const highlightRange = ref<HighlightRange | null>(null)
+  const pronounHighlights = ref<PronounMatch[]>([])
   const mergeOriginal = ref<string | null>(null)
   const mergeModified = ref<string | null>(null)
 
@@ -22,6 +23,7 @@ export const useToolStore = defineStore('tools', () => {
     activeTool.value = toolId
     result.value = null
     highlightRange.value = null
+    pronounHighlights.value = []
   }
 
   function setHighlightRange(range: HighlightRange) {
@@ -30,6 +32,14 @@ export const useToolStore = defineStore('tools', () => {
 
   function clearHighlightRange() {
     highlightRange.value = null
+  }
+
+  function setPronounHighlights(matches: PronounMatch[]) {
+    pronounHighlights.value = matches
+  }
+
+  function clearPronounHighlights() {
+    pronounHighlights.value = []
   }
 
   function setRunning(running: boolean) {
@@ -62,9 +72,10 @@ export const useToolStore = defineStore('tools', () => {
   }
 
   return {
-    activeTool, isRunning, result, history, highlightRange,
+    activeTool, isRunning, result, history, highlightRange, pronounHighlights,
     mergeOriginal, mergeModified,
     setActiveTool, setRunning, setResult, setHighlightRange, clearHighlightRange,
+    setPronounHighlights, clearPronounHighlights,
     setMergeState, clearMergeState,
   }
 })

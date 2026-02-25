@@ -45,13 +45,15 @@ export interface StyleCheckResult {
 }
 
 export interface PronounCounts {
-  we: number
   i: number
   you: number
-  they: number
-  he: number
-  she: number
-  it: number
+  we: number
+}
+
+export interface PronounMatch {
+  from: number
+  to: number
+  group: keyof PronounCounts
 }
 
 export interface PronounResult {
@@ -59,6 +61,7 @@ export interface PronounResult {
   counts: PronounCounts
   total: number
   percentages: Record<keyof PronounCounts, number>
+  matches: PronounMatch[]
   toneAssessment: string
 }
 

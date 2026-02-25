@@ -1,11 +1,25 @@
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import type { PronounResult as PronounResultType, PronounCounts } from '@/tools/types'
+import { useToolStore } from '@/stores/tools'
 
 const props = defineProps<{
   result: PronounResultType
 }>()
 
-const pronounLabels: (keyof PronounCounts)[] = ['we', 'i', 'you', 'they', 'he', 'she', 'it']
+const toolStore = useToolStore()
+
+const pronounGroups: { key: keyof PronounCounts; label: string; color: string; bgClass: string; barClass: string; borderClass: string }[] = [
+  { key: 'i', label: 'I / me / my / mine', color: 'blue', bgClass: 'bg-blue-50', barClass: 'bg-blue-400', borderClass: 'border-blue-200' },
+  { key: 'you', label: 'you / your / yours', color: 'green', bgClass: 'bg-green-50', barClass: 'bg-green-400', borderClass: 'border-green-200' },
+  { key: 'we', label: 'we / us / our / ours', color: 'amber', bgClass: 'bg-amber-50', barClass: 'bg-amber-400', borderClass: 'border-amber-200' },
+]
+
+onMounted(() => {
+  if (props.result.matches.length > 0) {
+    toolStore.setPronounHighlights(props.result.matches)
+  }
+})
 </script>
 
 <template>
@@ -18,22 +32,27 @@ const pronounLabels: (keyof PronounCounts)[] = ['we', 'i', 'you', 'they', 'he', 
       Total pronouns: <span class="font-medium">{{ props.result.total }}</span>
     </div>
 
-    <div class="flex flex-col gap-2">
+    <div class="flex flex-col gap-3">
       <div
-        v-for="pronoun in pronounLabels"
-        :key="pronoun"
-        class="flex items-center gap-3 text-sm"
+        v-for="group in pronounGroups"
+        :key="group.key"
+        data-testid="pronoun-card"
+        :class="['rounded-lg border p-3', group.bgClass, group.borderClass]"
       >
-        <span class="w-10 font-medium text-gray-700">{{ pronoun }}</span>
-        <span class="w-8 text-right text-gray-500">{{ props.result.counts[pronoun] }}</span>
-        <div class="relative h-4 flex-1 rounded bg-gray-100">
-          <div
-            data-testid="pronoun-bar"
-            class="h-4 rounded bg-blue-400"
-            :style="{ width: `${props.result.percentages[pronoun]}%` }"
-          />
+        <div class="mb-2 flex items-center justify-between">
+          <span class="text-sm font-medium text-gray-800">{{ group.label }}</span>
+          <span class="text-sm font-semibold text-gray-700">{{ props.result.counts[group.key] }}</span>
         </div>
-        <span class="w-10 text-right text-xs text-gray-500">{{ props.result.percentages[pronoun] }}%</span>
+        <div class="flex items-center gap-2">
+          <div class="relative h-3 flex-1 rounded-full bg-white/60">
+            <div
+              data-testid="pronoun-bar"
+              :class="['h-3 rounded-full', group.barClass]"
+              :style="{ width: `${props.result.percentages[group.key]}%` }"
+            />
+          </div>
+          <span class="w-10 text-right text-xs font-medium text-gray-600">{{ props.result.percentages[group.key] }}%</span>
+        </div>
       </div>
     </div>
   </div>

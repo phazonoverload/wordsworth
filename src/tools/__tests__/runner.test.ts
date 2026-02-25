@@ -26,9 +26,10 @@ vi.mock('@/tools/style-check', () => ({
 vi.mock('@/tools/pronouns', () => ({
   analyzePronouns: vi.fn(() => ({
     type: 'pronouns',
-    counts: { we: 0, i: 0, you: 0, they: 0, he: 0, she: 0, it: 0 },
+    counts: { i: 0, you: 0, we: 0 },
     total: 0,
-    percentages: { we: 0, i: 0, you: 0, they: 0, he: 0, she: 0, it: 0 },
+    percentages: { i: 0, you: 0, we: 0 },
+    matches: [],
     toneAssessment: 'Neutral',
   })),
 }))

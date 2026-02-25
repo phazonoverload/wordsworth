@@ -1,18 +1,23 @@
-import type { PronounResult, PronounCounts } from './types'
+import type { PronounResult, PronounCounts, PronounMatch } from './types'
 
-const PRONOUN_PATTERNS: Record<keyof PronounCounts, RegExp> = {
-  we: /\bwe\b/gi,
-  i: /\bi\b/gi,
-  you: /\byou\b/gi,
-  they: /\bthey\b/gi,
-  he: /\bhe\b/gi,
-  she: /\bshe\b/gi,
-  it: /\bit\b/gi,
+// Each group aggregates personal pronoun, objective, possessive adjective, and possessive pronoun
+const PRONOUN_GROUP_PATTERNS: Record<keyof PronounCounts, RegExp[]> = {
+  i: [/\bi\b/gi, /\bme\b/gi, /\bmy\b/gi, /\bmine\b/gi],
+  you: [/\byou\b/gi, /\byour\b/gi, /\byours\b/gi],
+  we: [/\bwe\b/gi, /\bus\b/gi, /\bour\b/gi, /\bours\b/gi],
 }
 
-function countMatches(text: string, regex: RegExp): number {
-  const matches = text.match(regex)
-  return matches ? matches.length : 0
+function collectMatches(text: string, group: keyof PronounCounts, patterns: RegExp[]): PronounMatch[] {
+  const matches: PronounMatch[] = []
+  for (const regex of patterns) {
+    // Reset lastIndex since we reuse the regex
+    const re = new RegExp(regex.source, regex.flags)
+    let match: RegExpExecArray | null
+    while ((match = re.exec(text)) !== null) {
+      matches.push({ from: match.index, to: match.index + match[0].length, group })
+    }
+  }
+  return matches
 }
 
 function assessTone(counts: PronounCounts, total: number): string {
@@ -20,7 +25,6 @@ function assessTone(counts: PronounCounts, total: number): string {
 
   const authorFocused = counts.i + counts.we
   const readerFocused = counts.you
-  const thirdPerson = counts.they + counts.he + counts.she + counts.it
 
   const authorPct = (authorFocused / total) * 100
   const readerPct = (readerFocused / total) * 100
@@ -29,19 +33,22 @@ function assessTone(counts: PronounCounts, total: number): string {
   if (readerPct > authorPct) return 'Mostly reader-focused tone.'
   if (authorPct > 50) return 'Strongly author-focused tone. Centered on the writer/team.'
   if (authorPct > readerPct) return 'Mostly author-focused tone.'
-  if (thirdPerson > authorFocused + readerFocused) return 'Third-person/descriptive tone.'
   return 'Balanced tone between author and reader.'
 }
 
 export function analyzePronouns(text: string): PronounResult {
-  const counts: PronounCounts = {
-    we: countMatches(text, PRONOUN_PATTERNS.we),
-    i: countMatches(text, PRONOUN_PATTERNS.i),
-    you: countMatches(text, PRONOUN_PATTERNS.you),
-    they: countMatches(text, PRONOUN_PATTERNS.they),
-    he: countMatches(text, PRONOUN_PATTERNS.he),
-    she: countMatches(text, PRONOUN_PATTERNS.she),
-    it: countMatches(text, PRONOUN_PATTERNS.it),
+  const allMatches: PronounMatch[] = []
+
+  for (const group of Object.keys(PRONOUN_GROUP_PATTERNS) as Array<keyof PronounCounts>) {
+    allMatches.push(...collectMatches(text, group, PRONOUN_GROUP_PATTERNS[group]))
+  }
+
+  // Sort by position for consistent ordering
+  allMatches.sort((a, b) => a.from - b.from)
+
+  const counts: PronounCounts = { i: 0, you: 0, we: 0 }
+  for (const match of allMatches) {
+    counts[match.group]++
   }
 
   const total = Object.values(counts).reduce((sum, n) => sum + n, 0)
@@ -56,6 +63,7 @@ export function analyzePronouns(text: string): PronounResult {
     counts,
     total,
     percentages,
+    matches: allMatches,
     toneAssessment: assessTone(counts, total),
   }
 }

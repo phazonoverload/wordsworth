@@ -42,6 +42,7 @@ vi.mock('@codemirror/view', () => ({
   ),
   Decoration: {
     line: vi.fn(() => ({ range: vi.fn(() => ({})) })),
+    mark: vi.fn(() => ({ range: vi.fn(() => ({})) })),
   },
   keymap: { of: vi.fn(() => []) },
   lineWrapping: [],
@@ -155,6 +156,24 @@ describe('EditorPane', () => {
     mockDispatch.mockClear()
 
     toolStore.clearHighlightRange()
+    await nextTick()
+
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        effects: expect.anything(),
+      }),
+    )
+  })
+
+  it('dispatches pronoun highlight effect when pronounHighlights change', async () => {
+    mount(EditorPane)
+    const toolStore = useToolStore()
+
+    mockDispatch.mockClear()
+    toolStore.setPronounHighlights([
+      { from: 0, to: 1, group: 'i' },
+      { from: 5, to: 8, group: 'you' },
+    ])
     await nextTick()
 
     expect(mockDispatch).toHaveBeenCalledWith(

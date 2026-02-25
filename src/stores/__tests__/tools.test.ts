@@ -91,6 +91,35 @@ describe('toolStore', () => {
     expect(store.highlightRange).toBeNull()
   })
 
+  it('starts with no pronoun highlights', () => {
+    const store = useToolStore()
+    expect(store.pronounHighlights).toEqual([])
+  })
+
+  it('sets pronoun highlights', () => {
+    const store = useToolStore()
+    const matches = [
+      { from: 0, to: 1, group: 'i' as const },
+      { from: 5, to: 8, group: 'you' as const },
+    ]
+    store.setPronounHighlights(matches)
+    expect(store.pronounHighlights).toEqual(matches)
+  })
+
+  it('clears pronoun highlights', () => {
+    const store = useToolStore()
+    store.setPronounHighlights([{ from: 0, to: 1, group: 'i' as const }])
+    store.clearPronounHighlights()
+    expect(store.pronounHighlights).toEqual([])
+  })
+
+  it('clears pronoun highlights when switching tools', () => {
+    const store = useToolStore()
+    store.setPronounHighlights([{ from: 0, to: 1, group: 'i' as const }])
+    store.setActiveTool('readability')
+    expect(store.pronounHighlights).toEqual([])
+  })
+
   it('limits history to 20 runs', () => {
     const store = useToolStore()
     store.setActiveTool('readability')

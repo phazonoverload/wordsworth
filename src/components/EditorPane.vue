@@ -9,6 +9,7 @@ import { useToolStore } from '@/stores/tools'
 import { EditorState, StateField, StateEffect, RangeSet } from '@codemirror/state'
 import { EditorView, Decoration, lineNumbers, placeholder } from '@codemirror/view'
 import { markdown } from '@codemirror/lang-markdown'
+import type { PronounMatch, PronounCounts } from '@/tools/types'
 
 const setHighlightEffect = StateEffect.define<{ from: number; to: number } | null>()
 
@@ -35,6 +36,70 @@ const highlightField = StateField.define<RangeSet<Decoration>>({
     }
     // Clear decorations on any document change (user editing)
     if (tr.docChanged) return RangeSet.empty
+    return decorations
+  },
+  provide: (field) => EditorView.decorations.from(field),
+})
+
+// Pronoun inline mark highlighting
+const PRONOUN_COLORS: Record<keyof PronounCounts, string> = {
+  i: '#dbeafe',    // blue-100
+  you: '#dcfce7',  // green-100
+  we: '#fef3c7',   // amber-100
+}
+
+const pronounMarkDecorations: Record<keyof PronounCounts, Decoration> = {
+  i: Decoration.mark({ class: 'cm-pronoun-i' }),
+  you: Decoration.mark({ class: 'cm-pronoun-you' }),
+  we: Decoration.mark({ class: 'cm-pronoun-we' }),
+}
+
+const setPronounHighlightsEffect = StateEffect.define<PronounMatch[]>()
+
+const pronounHighlightField = StateField.define<RangeSet<Decoration>>({
+  create() {
+    return RangeSet.empty
+  },
+  update(decorations, tr) {
+    for (const effect of tr.effects) {
+      if (effect.is(setPronounHighlightsEffect)) {
+        const matches = effect.value
+        if (matches.length === 0) return RangeSet.empty
+        const docLen = tr.state.doc.length
+        const ranges = matches
+          .filter(m => m.from < docLen && m.to <= docLen)
+          .map(m => pronounMarkDecorations[m.group].range(m.from, m.to))
+          .sort((a, b) => a.from - b.from)
+        return RangeSet.of(ranges)
+      }
+    }
+
+    if (tr.docChanged) {
+      // Remove highlights that overlap with edited regions; keep the rest mapped to new positions
+      let mapped = decorations.map(tr.changes)
+      // Check each changed range and remove any decorations that overlap
+      const rangesToRemove: { from: number; to: number }[] = []
+      tr.changes.iterChangedRanges((_fromOld, _toOld, fromNew, toNew) => {
+        rangesToRemove.push({ from: fromNew, to: toNew })
+      })
+      if (rangesToRemove.length > 0) {
+        const kept: { from: number; to: number; value: Decoration }[] = []
+        const cursor = mapped.iter()
+        while (cursor.value) {
+          const decoFrom = cursor.from
+          const decoTo = cursor.to
+          const overlaps = rangesToRemove.some(
+            r => decoFrom < r.to && decoTo > r.from,
+          )
+          if (!overlaps) {
+            kept.push({ from: decoFrom, to: decoTo, value: cursor.value })
+          }
+          cursor.next()
+        }
+        return RangeSet.of(kept.map(k => k.value.range(k.from, k.to)))
+      }
+      return mapped
+    }
     return decorations
   },
   provide: (field) => EditorView.decorations.from(field),
@@ -71,6 +136,18 @@ const theme = EditorView.theme({
   '.cm-highlighted-line': {
     backgroundColor: '#fef9c3',
   },
+  '.cm-pronoun-i': {
+    backgroundColor: PRONOUN_COLORS.i,
+    borderRadius: '2px',
+  },
+  '.cm-pronoun-you': {
+    backgroundColor: PRONOUN_COLORS.you,
+    borderRadius: '2px',
+  },
+  '.cm-pronoun-we': {
+    backgroundColor: PRONOUN_COLORS.we,
+    borderRadius: '2px',
+  },
 })
 
 const updateListener = EditorView.updateListener.of((update) => {
@@ -98,6 +175,7 @@ onMounted(() => {
       theme,
       updateListener,
       highlightField,
+      pronounHighlightField,
       placeholder('Paste markdown here'),
     ],
   })
@@ -152,6 +230,16 @@ watch(
         setHighlightEffect.of({ from, to }),
         EditorView.scrollIntoView(from, { y: 'center' }),
       ],
+    })
+  },
+)
+
+watch(
+  () => toolStore.pronounHighlights,
+  (matches) => {
+    if (!view) return
+    view.dispatch({
+      effects: setPronounHighlightsEffect.of(matches),
     })
   },
 )
