@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { Settings } from 'lucide-vue-next'
 import EditorPane from '@/components/EditorPane.vue'
-import ToolBar from '@/components/ToolBar.vue'
+import ToolSelector from '@/components/ToolSelector.vue'
 import ReaderContext from '@/components/ReaderContext.vue'
 import ResultsPane from '@/components/ResultsPane.vue'
 import SettingsModal from '@/components/SettingsModal.vue'
@@ -36,7 +36,7 @@ useAutoRun()
 
       <!-- Center: Tool bar -->
       <aside class="w-56 border-x border-gray-200 overflow-y-auto bg-gray-50">
-        <ToolBar />
+        <ToolSelector />
       </aside>
 
       <!-- Right: Results -->
