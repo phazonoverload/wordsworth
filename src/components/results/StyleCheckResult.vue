@@ -1,14 +1,21 @@
 <script setup lang="ts">
-import type { StyleCheckResult as StyleCheckResultType } from '@/tools/types'
+import type { StyleCheckResult as StyleCheckResultType, StyleIssue } from '@/tools/types'
+import { useToolStore } from '@/stores/tools'
 
 const props = defineProps<{
   result: StyleCheckResultType
 }>()
 
+const toolStore = useToolStore()
+
 function severityClasses(severity: 'warning' | 'info'): string {
   return severity === 'warning'
     ? 'bg-yellow-100 text-yellow-800'
     : 'bg-blue-100 text-blue-800'
+}
+
+function onIssueClick(issue: StyleIssue) {
+  toolStore.setHighlightRange({ from: issue.offset, to: issue.offset + issue.length })
 }
 </script>
 
@@ -27,7 +34,9 @@ function severityClasses(severity: 'warning' | 'info'): string {
         <div
           v-for="issue in props.result.issues"
           :key="`${issue.line}-${issue.offset}`"
-          class="rounded border border-gray-200 p-3 text-sm"
+          data-testid="style-issue"
+          class="cursor-pointer rounded border border-gray-200 p-3 text-sm transition-colors hover:border-blue-300 hover:bg-blue-50"
+          @click="onIssueClick(issue)"
         >
           <div class="mb-1 flex items-center gap-2">
             <span

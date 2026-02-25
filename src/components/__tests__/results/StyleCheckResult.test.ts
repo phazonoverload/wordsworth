@@ -1,6 +1,8 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { createPinia, setActivePinia } from 'pinia'
 import StyleCheckResult from '../../results/StyleCheckResult.vue'
+import { useToolStore } from '@/stores/tools'
 import type { StyleCheckResult as StyleCheckResultType, StyleIssue } from '@/tools/types'
 
 function makeIssue(overrides: Partial<StyleIssue> = {}): StyleIssue {
@@ -23,6 +25,10 @@ function makeResult(issues: StyleIssue[] = []): StyleCheckResultType {
 }
 
 describe('StyleCheckResult', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
+
   it('shows "No issues found" when issues list is empty', () => {
     const wrapper = mount(StyleCheckResult, { props: { result: makeResult() } })
     expect(wrapper.text()).toContain('No issues found')
@@ -80,5 +86,30 @@ describe('StyleCheckResult', () => {
     })
     const badge = wrapper.find('[data-testid="severity-badge"]')
     expect(badge.classes()).toContain('bg-blue-100')
+  })
+
+  it('calls setHighlightRange when an issue is clicked', async () => {
+    const pinia = createPinia()
+    const wrapper = mount(StyleCheckResult, {
+      props: { result: makeResult([makeIssue({ offset: 10, length: 12 })]) },
+      global: { plugins: [pinia] },
+    })
+    const store = useToolStore(pinia)
+    const spy = vi.spyOn(store, 'setHighlightRange')
+
+    await wrapper.find('[data-testid="style-issue"]').trigger('click')
+
+    expect(spy).toHaveBeenCalledWith({ from: 10, to: 22 })
+  })
+
+  it('issue elements have cursor-pointer for clickability', () => {
+    const pinia = createPinia()
+    const wrapper = mount(StyleCheckResult, {
+      props: { result: makeResult([makeIssue()]) },
+      global: { plugins: [pinia] },
+    })
+
+    const issueEl = wrapper.find('[data-testid="style-issue"]')
+    expect(issueEl.classes()).toContain('cursor-pointer')
   })
 })
