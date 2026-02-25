@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { TOOLS, type ToolId } from '@/tools/types'
+import { TOOLS } from '@/tools/types'
 import { useToolStore } from '@/stores/tools'
 import { useSettingsStore } from '@/stores/settings'
 import { runTool } from '@/tools/runner'
