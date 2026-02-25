@@ -16,8 +16,8 @@ useAutoRun()
 <template>
   <div class="h-screen flex flex-col bg-white text-gray-900">
     <!-- Header -->
-    <header class="border-b border-gray-200 px-4 py-2 flex items-center justify-between bg-white">
-      <h1 class="text-lg font-semibold">Wordsworth</h1>
+    <header class="border-b border-gray-200 px-4 py-4 md:py-2 flex items-center justify-between bg-white">
+      <h1 class="text-lg font-semibold leading-tight">Wordsworth<br class="md:hidden" /> <span class="text-sm font-semibold text-gray-400">by <a href="https://lws.io" target="_blank" rel="noopener noreferrer" class="hover:text-gray-600">Kevin Lewis</a></span></h1>
       <button
         class="flex items-center gap-1.5 px-3 py-1 text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
         @click="showSettings = true"
