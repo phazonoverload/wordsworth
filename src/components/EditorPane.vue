@@ -7,7 +7,7 @@ import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useDocumentStore } from '@/stores/document'
 import { useToolStore } from '@/stores/tools'
 import { EditorState } from '@codemirror/state'
-import { EditorView, lineNumbers } from '@codemirror/view'
+import { EditorView, lineNumbers, placeholder } from '@codemirror/view'
 import { markdown } from '@codemirror/lang-markdown'
 
 const editorRef = ref<HTMLDivElement>()
@@ -67,6 +67,7 @@ onMounted(() => {
       EditorView.lineWrapping,
       theme,
       updateListener,
+      placeholder('Paste markdown here'),
     ],
   })
 
