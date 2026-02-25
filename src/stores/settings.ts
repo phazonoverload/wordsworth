@@ -22,6 +22,11 @@ export const useSettingsStore = defineStore('settings', () => {
     Object.values(keys.value).some((k) => k && k.length > 0)
   )
 
+  const hasKeyForCurrentProvider = computed(() => {
+    const k = keys.value[provider.value as ProviderId]
+    return !!k && k.length > 0
+  })
+
   function setKey(providerId: ProviderId, key: string) {
     keys.value[providerId] = key
     storage.set('wordsworth:keys', keys.value)
@@ -44,5 +49,5 @@ export const useSettingsStore = defineStore('settings', () => {
     })
   }
 
-  return { keys, provider, model, hasAnyKey, setKey, setProvider, setModel }
+  return { keys, provider, model, hasAnyKey, hasKeyForCurrentProvider, setKey, setProvider, setModel }
 })

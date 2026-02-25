@@ -66,4 +66,29 @@ describe('settingsStore', () => {
     expect(store.provider).toBe('google')
     expect(store.model).toBe('gemini-flash')
   })
+
+  it('reports hasKeyForCurrentProvider as false when no key set', () => {
+    const store = useSettingsStore()
+    expect(store.hasKeyForCurrentProvider).toBe(false)
+  })
+
+  it('reports hasKeyForCurrentProvider as true when key set for current provider', () => {
+    const store = useSettingsStore()
+    store.setKey('openai', 'sk-test')
+    expect(store.hasKeyForCurrentProvider).toBe(true)
+  })
+
+  it('reports hasKeyForCurrentProvider as false when key set for different provider', () => {
+    const store = useSettingsStore()
+    store.setKey('anthropic', 'sk-ant-test')
+    // Default provider is openai
+    expect(store.hasKeyForCurrentProvider).toBe(false)
+  })
+
+  it('updates hasKeyForCurrentProvider when provider changes', () => {
+    const store = useSettingsStore()
+    store.setKey('anthropic', 'sk-ant-test')
+    store.setProvider('anthropic')
+    expect(store.hasKeyForCurrentProvider).toBe(true)
+  })
 })
