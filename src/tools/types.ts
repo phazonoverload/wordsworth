@@ -1,4 +1,4 @@
-export type ToolId = 'readability' | 'style-check' | 'pronouns' | 'cut-twenty' | 'promise-tracker'
+export type ToolId = 'readability' | 'style-check' | 'pronouns' | 'cut-twenty' | 'promise-tracker' | 'header-shift'
 
 export type ToolCategory = 'analysis' | 'ai'
 
@@ -14,6 +14,7 @@ export const TOOLS: ToolDefinition[] = [
   { id: 'style-check', label: 'Style Check', category: 'analysis', description: 'Passive voice, wordy phrases, inconsistent spelling & terminology' },
   { id: 'pronouns', label: 'Pronouns', category: 'analysis', description: 'Pronoun frequency, tone assessment' },
   { id: 'promise-tracker', label: 'Promises', category: 'ai', description: 'Check if intro promises are delivered in conclusion' },
+  { id: 'header-shift', label: 'Header Shift', category: 'analysis', description: 'Promote or demote all markdown headers by one level' },
 ]
 
 export interface ReadabilityResult {
@@ -97,12 +98,28 @@ export interface PromiseResult {
   verdicts: PromiseVerdict[]
 }
 
+export type HeaderCounts = Record<1 | 2 | 3 | 4 | 5 | 6, number>
+
+export interface HeaderShiftResult {
+  type: 'header-shift'
+  headerCounts: HeaderCounts
+  totalHeaders: number
+}
+
+export interface ShiftResult {
+  ok: boolean
+  content?: string
+  error?: string
+  shifted: number
+}
+
 export type ToolResult =
   | ReadabilityResult
   | StyleCheckResult
   | PronounResult
   | CutResult
   | PromiseResult
+  | HeaderShiftResult
 
 export interface ToolRun {
   toolId: ToolId
