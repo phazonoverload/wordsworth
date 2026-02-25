@@ -14,10 +14,11 @@ const PROVIDERS = [
   { value: 'google' as const, label: 'Google', models: ['gemini-2.5-flash', 'gemini-2.5-pro'] },
 ]
 
-const showKeys = ref<Record<string, boolean>>({
-  openai: false,
-  anthropic: false,
-  google: false,
+const showKey = ref(false)
+
+const currentProviderLabel = computed(() => {
+  const found = PROVIDERS.find((p) => p.value === settingsStore.provider)
+  return found ? found.label : ''
 })
 
 const currentModels = computed(() => {
@@ -43,10 +44,6 @@ function onModelChange(event: Event) {
 function onKeyInput(providerId: ProviderId, event: Event) {
   const target = event.target as HTMLInputElement
   settingsStore.setKey(providerId, target.value)
-}
-
-function toggleKeyVisibility(providerId: string) {
-  showKeys.value[providerId] = !showKeys.value[providerId]
 }
 
 function close() {
@@ -138,37 +135,32 @@ function onKeydown(event: KeyboardEvent) {
             </select>
           </div>
 
-          <!-- API Keys -->
-          <div class="space-y-4">
-            <h3 class="text-sm font-medium text-gray-700">API Keys</h3>
-            <div
-              v-for="p in PROVIDERS"
-              :key="p.value"
-              class="flex items-center gap-2"
-            >
-              <!-- Key configured indicator -->
+          <!-- API Key for current provider -->
+          <div class="space-y-2">
+            <h3 class="text-sm font-medium text-gray-700">API Key</h3>
+            <div class="flex items-center gap-2">
               <span
-                :data-testid="`key-indicator-${p.value}`"
+                data-testid="key-indicator"
                 class="inline-block w-2 h-2 rounded-full flex-shrink-0"
-                :class="settingsStore.keys[p.value] ? 'bg-green-500' : 'bg-gray-300'"
+                :class="settingsStore.hasKeyForCurrentProvider ? 'bg-green-500' : 'bg-gray-300'"
               />
-              <label class="text-sm text-gray-600 w-20 flex-shrink-0">
-                {{ p.label }}
+              <label class="text-sm text-gray-600 flex-shrink-0">
+                {{ currentProviderLabel }}
               </label>
               <input
-                :data-testid="`key-input-${p.value}`"
-                :type="showKeys[p.value] ? 'text' : 'password'"
-                :value="settingsStore.keys[p.value] ?? ''"
-                :placeholder="`${p.label} API key`"
+                data-testid="key-input"
+                :type="showKey ? 'text' : 'password'"
+                :value="settingsStore.keys[settingsStore.provider as ProviderId] ?? ''"
+                :placeholder="`${currentProviderLabel} API key`"
                 class="flex-1 border border-gray-300 rounded px-3 py-1.5 text-sm bg-white text-gray-900"
-                @input="onKeyInput(p.value, $event)"
+                @input="onKeyInput(settingsStore.provider as ProviderId, $event)"
               />
               <button
-                :data-testid="`key-toggle-${p.value}`"
+                data-testid="key-toggle"
                 class="text-xs text-gray-500 hover:text-gray-700 flex-shrink-0"
-                @click="toggleKeyVisibility(p.value)"
+                @click="showKey = !showKey"
               >
-                {{ showKeys[p.value] ? 'Hide' : 'Show' }}
+                {{ showKey ? 'Hide' : 'Show' }}
               </button>
             </div>
           </div>
