@@ -39,12 +39,12 @@ function isTechnicalAudience(readerContext: string): boolean {
   )
 }
 
-function findLineAndOffset(text: string, matchIndex: number): { line: number; offset: number } {
+function findLineAndOffset(text: string, matchIndex: number): { line: number; offset: number; absoluteOffset: number } {
   const upTo = text.slice(0, matchIndex)
   const line = (upTo.match(/\n/g) || []).length + 1
   const lastNewline = upTo.lastIndexOf('\n')
   const offset = matchIndex - (lastNewline + 1)
-  return { line, offset }
+  return { line, offset, absoluteOffset: matchIndex }
 }
 
 export function checkStyle(text: string, readerContext: string): StyleCheckResult {
@@ -54,13 +54,14 @@ export function checkStyle(text: string, readerContext: string): StyleCheckResul
   let match: RegExpExecArray | null
   const passiveRegex = new RegExp(PASSIVE_REGEX.source, 'gi')
   while ((match = passiveRegex.exec(text)) !== null) {
-    const { line, offset } = findLineAndOffset(text, match.index)
+    const { line, offset, absoluteOffset } = findLineAndOffset(text, match.index)
     issues.push({
       severity: 'warning',
       category: 'passive-voice',
       message: `Passive voice: "${match[0]}". Consider rewriting in active voice.`,
       line,
       offset,
+      absoluteOffset,
       length: match[0].length,
     })
   }
@@ -69,13 +70,14 @@ export function checkStyle(text: string, readerContext: string): StyleCheckResul
   for (const { pattern, suggestion, label } of WORDY_PHRASES) {
     const regex = new RegExp(pattern.source, 'gi')
     while ((match = regex.exec(text)) !== null) {
-      const { line, offset } = findLineAndOffset(text, match.index)
+      const { line, offset, absoluteOffset } = findLineAndOffset(text, match.index)
       issues.push({
         severity: 'info',
         category: 'wordiness',
         message: `Wordy: "${label}" can be simplified.`,
         line,
         offset,
+        absoluteOffset,
         length: match[0].length,
         suggestion,
       })
@@ -89,13 +91,14 @@ export function checkStyle(text: string, readerContext: string): StyleCheckResul
     for (const word of words) {
       const cleaned = word.replace(/[^a-z]/g, '')
       if (TECHNICAL_JARGON.includes(cleaned)) {
-        const { line, offset } = findLineAndOffset(text, charIndex)
+        const { line, offset, absoluteOffset } = findLineAndOffset(text, charIndex)
         issues.push({
           severity: 'info',
           category: 'jargon',
           message: `"${cleaned}" may be unfamiliar to your target reader.`,
           line,
           offset,
+          absoluteOffset,
           length: word.length,
           suggestion: `Consider explaining or replacing "${cleaned}"`,
         })

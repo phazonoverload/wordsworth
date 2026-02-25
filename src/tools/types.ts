@@ -34,6 +34,7 @@ export interface StyleIssue {
   message: string
   line: number
   offset: number
+  absoluteOffset: number
   length: number
   suggestion?: string
 }

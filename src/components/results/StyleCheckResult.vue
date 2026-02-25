@@ -15,7 +15,7 @@ function severityClasses(severity: 'warning' | 'info'): string {
 }
 
 function onIssueClick(issue: StyleIssue) {
-  toolStore.setHighlightRange({ from: issue.offset, to: issue.offset + issue.length })
+  toolStore.setHighlightRange({ from: issue.absoluteOffset, to: issue.absoluteOffset + issue.length })
 }
 </script>
 

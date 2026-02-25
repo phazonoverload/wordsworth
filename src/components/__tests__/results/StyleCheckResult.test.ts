@@ -12,6 +12,7 @@ function makeIssue(overrides: Partial<StyleIssue> = {}): StyleIssue {
     message: 'Passive voice detected',
     line: 5,
     offset: 10,
+    absoluteOffset: 50,
     length: 12,
     ...overrides,
   }
@@ -91,7 +92,7 @@ describe('StyleCheckResult', () => {
   it('calls setHighlightRange when an issue is clicked', async () => {
     const pinia = createPinia()
     const wrapper = mount(StyleCheckResult, {
-      props: { result: makeResult([makeIssue({ offset: 10, length: 12 })]) },
+      props: { result: makeResult([makeIssue({ absoluteOffset: 50, length: 12 })]) },
       global: { plugins: [pinia] },
     })
     const store = useToolStore(pinia)
@@ -99,7 +100,7 @@ describe('StyleCheckResult', () => {
 
     await wrapper.find('[data-testid="style-issue"]').trigger('click')
 
-    expect(spy).toHaveBeenCalledWith({ from: 10, to: 22 })
+    expect(spy).toHaveBeenCalledWith({ from: 50, to: 62 })
   })
 
   it('issue elements have cursor-pointer for clickability', () => {
