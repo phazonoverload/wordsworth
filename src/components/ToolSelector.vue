@@ -8,8 +8,6 @@ import type { ToolId } from '@/tools/types'
 const toolStore = useToolStore()
 const settingsStore = useSettingsStore()
 
-const allTools = [...TOOLS.filter((t) => t.category === 'analysis'), ...TOOLS.filter((t) => t.category === 'ai')]
-
 function activeDef() {
   return TOOLS.find(t => t.id === toolStore.activeTool)
 }
@@ -56,21 +54,9 @@ function onRun() {
       @change="onSelect"
     >
       <option value="" disabled>Select a tool...</option>
-      <optgroup label="Analysis">
-        <option v-for="tool in allTools.filter(t => t.category === 'analysis')" :key="tool.id" :value="tool.id">
-          {{ tool.label }}
-        </option>
-      </optgroup>
-      <optgroup label="AI">
-        <option
-          v-for="tool in allTools.filter(t => t.category === 'ai')"
-          :key="tool.id"
-          :value="tool.id"
-          :disabled="!settingsStore.hasKeyForCurrentProvider"
-        >
-          {{ tool.label }}
-        </option>
-      </optgroup>
+      <option v-for="tool in TOOLS" :key="tool.id" :value="tool.id">
+        {{ tool.label }}
+      </option>
     </select>
     <button
       v-if="showAiButton()"
