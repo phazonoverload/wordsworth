@@ -5,12 +5,14 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useDocumentStore } from '@/stores/document'
+import { useToolStore } from '@/stores/tools'
 import { EditorState } from '@codemirror/state'
-import { EditorView } from '@codemirror/view'
+import { EditorView, lineNumbers } from '@codemirror/view'
 import { markdown } from '@codemirror/lang-markdown'
 
 const editorRef = ref<HTMLDivElement>()
 const documentStore = useDocumentStore()
+const toolStore = useToolStore()
 
 let view: EditorView | null = null
 let isUpdatingFromStore = false
@@ -31,6 +33,9 @@ const theme = EditorView.theme({
   },
   '&.cm-focused': {
     outline: 'none',
+  },
+  '&.cm-focused .cm-selectionBackground, .cm-selectionBackground': {
+    backgroundColor: '#fef08a !important',
   },
 })
 
@@ -54,6 +59,7 @@ onMounted(() => {
     doc: documentStore.content,
     extensions: [
       markdown(),
+      lineNumbers(),
       EditorView.lineWrapping,
       theme,
       updateListener,
@@ -92,6 +98,20 @@ watch(
       },
     })
     isUpdatingFromStore = false
+  },
+)
+
+watch(
+  () => toolStore.highlightRange,
+  (range) => {
+    if (!view) return
+    if (!range) return
+    const from = Math.min(range.from, view.state.doc.length)
+    const to = Math.min(range.to, view.state.doc.length)
+    view.dispatch({
+      selection: { anchor: from, head: to },
+      scrollIntoView: true,
+    })
   },
 )
 </script>
