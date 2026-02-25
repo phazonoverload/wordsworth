@@ -18,6 +18,12 @@ function isAiTool() {
   return activeDef()?.category === 'ai'
 }
 
+function showAiButton() {
+  if (!isAiTool()) return false
+  if (toolStore.result && toolStore.result.type === toolStore.activeTool) return false
+  return true
+}
+
 function isRunDisabled(): boolean {
   if (toolStore.isRunning) return true
   if (!toolStore.activeTool) return true
@@ -42,7 +48,7 @@ function onRun() {
 </script>
 
 <template>
-  <div class="tool-selector flex items-center gap-2">
+  <div class="tool-selector flex flex-col gap-2">
     <select
       :value="toolStore.activeTool ?? ''"
       :disabled="toolStore.isRunning"
@@ -67,7 +73,7 @@ function onRun() {
       </optgroup>
     </select>
     <button
-      v-if="isAiTool()"
+      v-if="showAiButton()"
       :disabled="isRunDisabled()"
       class="shrink-0 cursor-pointer rounded bg-orange-500 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
       @click="onRun"
