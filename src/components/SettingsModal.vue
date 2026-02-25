@@ -17,10 +17,10 @@ const PROVIDERS = [
 const showKey = ref(false)
 
 const currentProvider = computed(() =>
-  PROVIDERS.find((p) => p.value === settingsStore.provider) ?? PROVIDERS[0]
+  PROVIDERS.find((p) => p.value === settingsStore.provider) ?? PROVIDERS[0]!
 )
 
-const currentModelName = computed(() => currentProvider.value.model)
+const currentModelName = computed(() => currentProvider.value!.model)
 
 function selectProvider(p: typeof PROVIDERS[number]) {
   settingsStore.setProvider(p.value)
@@ -118,7 +118,7 @@ function onKeydown(event: KeyboardEvent) {
                 data-testid="key-input"
                 :type="showKey ? 'text' : 'password'"
                 :value="settingsStore.keys[settingsStore.provider as ProviderId] ?? ''"
-                :placeholder="`${currentProvider.label} API key`"
+                :placeholder="`${currentProvider!.label} API key`"
                 class="flex-1 border border-gray-300 rounded px-3 py-1.5 text-sm bg-white text-gray-900"
                 @input="onKeyInput(settingsStore.provider as ProviderId, $event)"
               />
