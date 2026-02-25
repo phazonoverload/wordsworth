@@ -24,36 +24,18 @@ async function selectTool(tool: (typeof TOOLS)[number]) {
 </script>
 
 <template>
-  <div class="tool-selector flex items-center gap-1 flex-wrap">
+  <div class="tool-selector flex items-center gap-3 flex-wrap">
     <button
-      v-for="tool in analysisTools"
+      v-for="tool in [...analysisTools, ...aiTools]"
       :key="tool.id"
       :disabled="isDisabled(tool)"
+      :title="tool.category === 'ai' && !settingsStore.hasKeyForCurrentProvider && !toolStore.isRunning ? 'Set API key in Settings' : undefined"
       :class="[
-        'rounded-full px-3 py-1 text-sm transition whitespace-nowrap',
+        'cursor-pointer rounded-full border px-3 py-1 text-sm shadow-sm transition whitespace-nowrap',
         'disabled:cursor-not-allowed disabled:opacity-50',
         toolStore.activeTool === tool.id
-          ? 'active bg-blue-100 font-medium text-blue-900'
-          : 'text-gray-700 hover:bg-gray-100',
-      ]"
-      @click="selectTool(tool)"
-    >
-      {{ tool.label }}
-    </button>
-
-    <span class="mx-1 text-gray-300">|</span>
-
-    <button
-      v-for="tool in aiTools"
-      :key="tool.id"
-      :disabled="isDisabled(tool)"
-      :title="!settingsStore.hasKeyForCurrentProvider && !toolStore.isRunning ? 'Set API key in Settings' : undefined"
-      :class="[
-        'rounded-full px-3 py-1 text-sm transition whitespace-nowrap',
-        'disabled:cursor-not-allowed disabled:opacity-50',
-        toolStore.activeTool === tool.id
-          ? 'active bg-blue-100 font-medium text-blue-900'
-          : 'text-gray-700 hover:bg-gray-100',
+          ? 'active border-blue-300 bg-blue-100 font-medium text-blue-900'
+          : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300 hover:bg-gray-100',
       ]"
       @click="selectTool(tool)"
     >

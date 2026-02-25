@@ -32,9 +32,9 @@ describe('App', () => {
     expect(wrapper.findComponent({ name: 'EditorPane' }).exists()).toBe(true)
   })
 
-  it('renders the ReaderContext component', () => {
+  it('does not render the ReaderContext component (moved to ReadabilityResult)', () => {
     const wrapper = mountApp()
-    expect(wrapper.findComponent({ name: 'ReaderContext' }).exists()).toBe(true)
+    expect(wrapper.findComponent({ name: 'ReaderContext' }).exists()).toBe(false)
   })
 
   it('renders the ResultsPane component', () => {

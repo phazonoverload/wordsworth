@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ReadabilityResult as ReadabilityResultType } from '@/tools/types'
+import ReaderContext from '@/components/ReaderContext.vue'
 
 const props = defineProps<{
   result: ReadabilityResultType
@@ -14,6 +15,8 @@ function gradeColor(level: number): string {
 
 <template>
   <div class="flex flex-col gap-4">
+    <ReaderContext />
+
     <div class="flex items-center gap-3">
       <span
         data-testid="grade-indicator"

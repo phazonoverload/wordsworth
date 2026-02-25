@@ -37,7 +37,7 @@ describe('ReaderContext', () => {
 
     const textarea = wrapper.find('textarea')
     expect(textarea.element.value).toBe(
-      'Senior developers familiar with the tech stack',
+      'Senior developers who are familiar with the tech stack and comfortable with technical jargon, acronyms, and advanced concepts',
     )
   })
 
@@ -50,7 +50,7 @@ describe('ReaderContext', () => {
 
     expect(store.readerContext.preset).toBe('junior-devs')
     expect(store.readerContext.description).toBe(
-      'Junior developers learning the basics',
+      'Junior developers who are still learning the basics and benefit from clear explanations, defined terms, and step-by-step reasoning',
     )
   })
 
@@ -88,12 +88,12 @@ describe('ReaderContext', () => {
     await select.setValue('general')
 
     const textarea = wrapper.find('textarea')
-    expect(textarea.element.value).toBe('General technical audience')
+    expect(textarea.element.value).toBe('A general technical audience with mixed experience levels who appreciate clear writing without assuming deep domain expertise')
 
-    await textarea.setValue('General technical audience with some domain knowledge')
+    await textarea.setValue('A general technical audience with mixed experience levels who appreciate clear writing without assuming deep domain expertise, plus some domain knowledge')
 
     expect(store.readerContext.description).toBe(
-      'General technical audience with some domain knowledge',
+      'A general technical audience with mixed experience levels who appreciate clear writing without assuming deep domain expertise, plus some domain knowledge',
     )
   })
 

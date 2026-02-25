@@ -3,7 +3,6 @@ import { ref } from 'vue'
 import { Settings } from 'lucide-vue-next'
 import EditorPane from '@/components/EditorPane.vue'
 import MergePane from '@/components/MergePane.vue'
-import ReaderContext from '@/components/ReaderContext.vue'
 import ResultsPane from '@/components/ResultsPane.vue'
 import SettingsModal from '@/components/SettingsModal.vue'
 import { useAutoRun } from '@/composables/useAutoRun'
@@ -32,7 +31,6 @@ useAutoRun()
     <div class="flex-1 flex overflow-hidden">
       <!-- Left: Editor + Reader Context -->
       <div class="flex-1 flex flex-col overflow-hidden">
-        <ReaderContext />
         <MergePane v-if="toolStore.mergeOriginal && toolStore.mergeModified" class="flex-1" />
         <EditorPane v-else class="flex-1" />
       </div>
