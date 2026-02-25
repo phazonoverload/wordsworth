@@ -14,6 +14,7 @@
     "@ai-sdk/openai": "^3.0.31",
     "@codemirror/lang-markdown": "^6.5.0",
     "@codemirror/language-data": "^6.5.2",
+    "@codemirror/merge": "^6.12.0",
     "@codemirror/state": "^6.5.4",
     "@codemirror/view": "^6.39.15",
     "ai": "^6.0.97",
