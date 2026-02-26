@@ -30,6 +30,12 @@ export const TOOLS: ToolDefinition[] = [
 		description: 'Promote or demote all markdown headers by one level',
 	},
 	{
+		id: 'cut-twenty',
+		label: 'Cut 20%',
+		category: 'ai',
+		description: 'Trim text to ~80% length with diff review',
+	},
+	{
 		id: 'promise-tracker',
 		label: 'Promises',
 		category: 'ai',

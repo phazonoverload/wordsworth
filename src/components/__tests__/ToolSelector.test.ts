@@ -16,10 +16,10 @@ describe('ToolSelector', () => {
 		vi.clearAllMocks()
 	})
 
-	it('renders a select with all 5 tools as options', () => {
+	it('renders a select with all 6 tools as options', () => {
 		const wrapper = mount(ToolSelector)
 		const options = wrapper.findAll('option').filter(o => o.text() !== 'Select a tool...')
-		expect(options).toHaveLength(5)
+		expect(options).toHaveLength(6)
 	})
 
 	it('displays tool labels in select options', () => {
@@ -29,6 +29,7 @@ describe('ToolSelector', () => {
 		expect(text).toContain('Style Check')
 		expect(text).toContain('Pronouns')
 		expect(text).toContain('Header Shift')
+		expect(text).toContain('Cut 20%')
 		expect(text).toContain('Promises')
 	})
 
