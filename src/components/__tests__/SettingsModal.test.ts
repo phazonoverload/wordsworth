@@ -29,7 +29,7 @@ describe('SettingsModal', () => {
     expect(wrapper.find('[data-testid="settings-modal"]').exists()).toBe(false)
   })
 
-  it('renders a single API key input (not three)', () => {
+  it('renders a single API key input for cloud providers (not three)', () => {
     const wrapper = mountModal()
     const inputs = wrapper.findAll('[data-testid="key-input"]')
     expect(inputs).toHaveLength(1)
@@ -39,13 +39,14 @@ describe('SettingsModal', () => {
     expect(wrapper.find('[data-testid="key-input-google"]').exists()).toBe(false)
   })
 
-  it('renders provider toggle buttons', () => {
+  it('renders provider toggle buttons including Ollama', () => {
     const wrapper = mountModal()
     const select = wrapper.find('[data-testid="provider-select"]')
     expect(select.exists()).toBe(true)
     expect(wrapper.find('[data-testid="provider-btn-openai"]').exists()).toBe(true)
     expect(wrapper.find('[data-testid="provider-btn-anthropic"]').exists()).toBe(true)
     expect(wrapper.find('[data-testid="provider-btn-google"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="provider-btn-ollama"]').exists()).toBe(true)
   })
 
   it('updates the store when provider button is clicked', async () => {
@@ -141,5 +142,87 @@ describe('SettingsModal', () => {
     const wrapper = mountModal()
     // Default is OpenAI
     expect(wrapper.text()).toContain('OpenAI')
+  })
+
+  // Ollama-specific tests
+  describe('Ollama provider', () => {
+    it('hides API key input when Ollama is selected', async () => {
+      const wrapper = mountModal()
+      await wrapper.find('[data-testid="provider-btn-ollama"]').trigger('click')
+      await wrapper.vm.$nextTick()
+
+      expect(wrapper.find('[data-testid="key-input"]').exists()).toBe(false)
+      expect(wrapper.find('[data-testid="key-toggle"]').exists()).toBe(false)
+      expect(wrapper.find('[data-testid="key-indicator"]').exists()).toBe(false)
+    })
+
+    it('shows model input when Ollama is selected', async () => {
+      const wrapper = mountModal()
+      await wrapper.find('[data-testid="provider-btn-ollama"]').trigger('click')
+      await wrapper.vm.$nextTick()
+
+      const modelInput = wrapper.find('[data-testid="ollama-model-input"]')
+      expect(modelInput.exists()).toBe(true)
+    })
+
+    it('shows base URL input when Ollama is selected', async () => {
+      const wrapper = mountModal()
+      await wrapper.find('[data-testid="provider-btn-ollama"]').trigger('click')
+      await wrapper.vm.$nextTick()
+
+      const urlInput = wrapper.find('[data-testid="ollama-base-url-input"]')
+      expect(urlInput.exists()).toBe(true)
+    })
+
+    it('updates model in store when Ollama model input changes', async () => {
+      const store = useSettingsStore()
+      store.setProvider('ollama')
+      store.setModel('llama3.1:8b')
+      const wrapper = mountModal()
+      await wrapper.vm.$nextTick()
+
+      const spy = vi.spyOn(store, 'setModel')
+      const modelInput = wrapper.find('[data-testid="ollama-model-input"]')
+      await modelInput.setValue('mistral:7b')
+      expect(spy).toHaveBeenCalledWith('mistral:7b')
+    })
+
+    it('updates base URL in store when base URL input changes', async () => {
+      const store = useSettingsStore()
+      store.setProvider('ollama')
+      const wrapper = mountModal()
+      await wrapper.vm.$nextTick()
+
+      const spy = vi.spyOn(store, 'setOllamaBaseUrl')
+      const urlInput = wrapper.find('[data-testid="ollama-base-url-input"]')
+      await urlInput.setValue('http://myhost:9999')
+      expect(spy).toHaveBeenCalledWith('http://myhost:9999')
+    })
+
+    it('displays the current model name from the store for Ollama', async () => {
+      const store = useSettingsStore()
+      store.setProvider('ollama')
+      store.setModel('codellama:13b')
+      const wrapper = mountModal()
+      await wrapper.vm.$nextTick()
+
+      expect(wrapper.text()).toContain('codellama:13b')
+    })
+
+    it('hides Ollama inputs when switching back to cloud provider', async () => {
+      const wrapper = mountModal()
+
+      // Switch to Ollama
+      await wrapper.find('[data-testid="provider-btn-ollama"]').trigger('click')
+      await wrapper.vm.$nextTick()
+      expect(wrapper.find('[data-testid="ollama-model-input"]').exists()).toBe(true)
+
+      // Switch back to OpenAI
+      await wrapper.find('[data-testid="provider-btn-openai"]').trigger('click')
+      await wrapper.vm.$nextTick()
+      expect(wrapper.find('[data-testid="ollama-model-input"]').exists()).toBe(false)
+      expect(wrapper.find('[data-testid="ollama-base-url-input"]').exists()).toBe(false)
+      expect(wrapper.find('[data-testid="key-input"]').exists()).toBe(true)
+    })
   })
 })

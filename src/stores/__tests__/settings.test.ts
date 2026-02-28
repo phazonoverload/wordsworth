@@ -91,4 +91,40 @@ describe('settingsStore', () => {
     store.setProvider('anthropic')
     expect(store.hasKeyForCurrentProvider).toBe(true)
   })
+
+  // Ollama-specific tests
+  it('reports isConfigured as true when provider is ollama (no key needed)', () => {
+    const store = useSettingsStore()
+    store.setProvider('ollama')
+    expect(store.isConfigured).toBe(true)
+    expect(store.hasKeyForCurrentProvider).toBe(true) // alias
+  })
+
+  it('defaults ollamaBaseUrl to localhost:11434', () => {
+    const store = useSettingsStore()
+    expect(store.ollamaBaseUrl).toBe('http://localhost:11434')
+  })
+
+  it('sets and persists ollamaBaseUrl', () => {
+    const store = useSettingsStore()
+    store.setOllamaBaseUrl('http://localhost:9999')
+    expect(store.ollamaBaseUrl).toBe('http://localhost:9999')
+    const raw = JSON.parse(localStorage.getItem('wordsworth:settings')!)
+    expect(raw.ollamaBaseUrl).toBe('http://localhost:9999')
+  })
+
+  it('loads ollamaBaseUrl from localStorage', () => {
+    localStorage.setItem(
+      'wordsworth:settings',
+      JSON.stringify({ provider: 'ollama', model: 'llama3.1:8b', ollamaBaseUrl: 'http://myhost:11434' })
+    )
+    const store = useSettingsStore()
+    expect(store.ollamaBaseUrl).toBe('http://myhost:11434')
+  })
+
+  it('ignores setKey calls for ollama provider', () => {
+    const store = useSettingsStore()
+    store.setKey('ollama', 'should-not-be-stored')
+    expect(store.keys).toEqual({})
+  })
 })
