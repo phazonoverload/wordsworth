@@ -2,7 +2,7 @@
 
 Wordsworth is a browser-based writing workbench for people who write technical content. Paste your Markdown into the editor, pick a tool, and get instant feedback on readability, style, and more.
 
-Most tools run entirely in the browser with no account or API key required. AI-powered features (audience assessment, style fixes) are bring-your-own-key -- enter an OpenAI, Anthropic, or Google API key in settings and requests go directly through a lightweight proxy. Nothing is stored server-side.
+Most tools run entirely in the browser with no account or API key required. AI-powered features (audience assessment, style fixes) are bring-your-own-key -- enter an OpenAI, Anthropic, or Google API key in settings and requests go directly through a lightweight proxy. You can also use [Ollama](https://ollama.com) to run models locally with no API key or cloud account required. Nothing is stored server-side.
 
 ## Tools
 
@@ -60,3 +60,15 @@ netlify dev
 This starts both the Vite frontend and the Netlify Functions server. The proxy accepts requests at `/api/ai` and forwards them to your configured AI provider (OpenAI, Anthropic, or Google). API keys are entered in the settings modal and stored in your browser's local storage -- they are sent per-request to the proxy and are never stored server-side.
 
 If you only need the non-AI tools, `npx vite` works fine -- the AI buttons simply won't appear unless you configure a key.
+
+### Using Ollama (local models)
+
+If you'd rather run AI features against a local model instead of a cloud API, you can use [Ollama](https://ollama.com):
+
+1. [Install Ollama](https://ollama.com/download) and pull a model (e.g. `ollama pull llama3.1:8b`).
+2. Make sure Ollama is running (`ollama serve` or the desktop app).
+3. In Wordsworth's settings modal, click the **Ollama** provider button.
+4. Enter the model name as shown by `ollama list` (e.g. `llama3.1:8b`).
+5. The base URL defaults to `http://localhost:11434` -- change it if Ollama is running on a different host or port.
+
+No API key is needed. Ollama requests go directly from your browser to the local Ollama server, bypassing the Netlify proxy entirely. Smaller models may produce lower-quality results for complex tasks like promise tracking, but work well for style fixes and audience assessment.

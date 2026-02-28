@@ -166,4 +166,177 @@ describe('callAI', () => {
     expect(body.apiKey).toBe('sk-anthropic')
     expect(body.provider).toBe('anthropic')
   })
+
+  // Ollama-specific tests
+  describe('Ollama provider', () => {
+    it('calls Ollama OpenAI-compatible endpoint directly (not /api/ai)', async () => {
+      const store = useSettingsStore()
+      store.setProvider('ollama')
+      store.setModel('llama3.1:8b')
+
+      const ollamaResponse = {
+        choices: [{
+          message: {
+            content: JSON.stringify({
+              chunks: [{ original: 'hello world', edited: 'hello', reason: 'shorter' }],
+            }),
+          },
+        }],
+      }
+
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(ollamaResponse),
+      })
+
+      await callAI({ action: 'cut-twenty', system: 'Be concise', prompt: 'hello world' })
+
+      expect(mockFetch).toHaveBeenCalledTimes(1)
+      const [url, options] = mockFetch.mock.calls[0]!
+      expect(url).toBe('http://localhost:11434/v1/chat/completions')
+      const body = JSON.parse(options.body)
+      expect(body.model).toBe('llama3.1:8b')
+      expect(body.response_format).toEqual({ type: 'json_object' })
+      expect(body.messages).toHaveLength(2)
+      expect(body.messages[0].role).toBe('system')
+      expect(body.messages[1].role).toBe('user')
+    })
+
+    it('does not require an API key for Ollama', async () => {
+      const store = useSettingsStore()
+      store.setProvider('ollama')
+      store.setModel('llama3.1:8b')
+      // No key set — should not throw "No API key configured"
+
+      const ollamaResponse = {
+        choices: [{
+          message: {
+            content: JSON.stringify({ assessment: 'Looks good' }),
+          },
+        }],
+      }
+
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(ollamaResponse),
+      })
+
+      const result = await callAI<{ assessment: string }>({
+        action: 'audience-assessment',
+        system: 'test',
+        prompt: 'test',
+      })
+      expect(result.assessment).toBe('Looks good')
+    })
+
+    it('uses custom base URL when configured', async () => {
+      const store = useSettingsStore()
+      store.setProvider('ollama')
+      store.setModel('llama3.1:8b')
+      store.setOllamaBaseUrl('http://myhost:9999')
+
+      const ollamaResponse = {
+        choices: [{
+          message: {
+            content: JSON.stringify({ editedParagraph: 'fixed text' }),
+          },
+        }],
+      }
+
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(ollamaResponse),
+      })
+
+      await callAI({ action: 'fix-single', system: 'test', prompt: 'test' })
+
+      const [url] = mockFetch.mock.calls[0]!
+      expect(url).toBe('http://myhost:9999/v1/chat/completions')
+    })
+
+    it('strips trailing slashes from Ollama base URL', async () => {
+      const store = useSettingsStore()
+      store.setProvider('ollama')
+      store.setModel('llama3.1:8b')
+      store.setOllamaBaseUrl('http://localhost:11434/')
+
+      const ollamaResponse = {
+        choices: [{
+          message: {
+            content: JSON.stringify({ editedDocument: 'doc' }),
+          },
+        }],
+      }
+
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(ollamaResponse),
+      })
+
+      await callAI({ action: 'fix-all', system: 'test', prompt: 'test' })
+
+      const [url] = mockFetch.mock.calls[0]!
+      expect(url).toBe('http://localhost:11434/v1/chat/completions')
+    })
+
+    it('throws when Ollama returns empty response', async () => {
+      const store = useSettingsStore()
+      store.setProvider('ollama')
+      store.setModel('llama3.1:8b')
+
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ choices: [{ message: { content: '' } }] }),
+      })
+
+      await expect(callAI({ action: 'cut-twenty', system: 'test', prompt: 'test' }))
+        .rejects.toThrow('Ollama returned an empty response')
+    })
+
+    it('throws when Ollama returns invalid JSON', async () => {
+      const store = useSettingsStore()
+      store.setProvider('ollama')
+      store.setModel('llama3.1:8b')
+
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ choices: [{ message: { content: 'not json at all' } }] }),
+      })
+
+      await expect(callAI({ action: 'cut-twenty', system: 'test', prompt: 'test' }))
+        .rejects.toThrow('Ollama returned invalid JSON')
+    })
+
+    it('throws when Ollama returns non-ok status', async () => {
+      const store = useSettingsStore()
+      store.setProvider('ollama')
+      store.setModel('llama3.1:8b')
+
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 500,
+        json: () => Promise.resolve({ error: { message: 'model not found' } }),
+      })
+
+      await expect(callAI({ action: 'cut-twenty', system: 'test', prompt: 'test' }))
+        .rejects.toThrow('model not found')
+    })
+
+    it('validates Ollama response against the Zod schema', async () => {
+      const store = useSettingsStore()
+      store.setProvider('ollama')
+      store.setModel('llama3.1:8b')
+
+      // Return valid JSON but wrong shape for cut-twenty
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({
+          choices: [{ message: { content: JSON.stringify({ wrong: 'shape' }) } }],
+        }),
+      })
+
+      await expect(callAI({ action: 'cut-twenty', system: 'test', prompt: 'test' }))
+        .rejects.toThrow()
+    })
+  })
 })
