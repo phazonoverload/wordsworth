@@ -127,4 +127,22 @@ describe('settingsStore', () => {
     store.setKey('ollama', 'should-not-be-stored')
     expect(store.keys).toEqual({})
   })
+
+  describe('OLLAMA_DISABLED', () => {
+    it('exports OLLAMA_DISABLED constant', async () => {
+      const { OLLAMA_DISABLED } = await import('@/stores/settings')
+      expect(typeof OLLAMA_DISABLED).toBe('boolean')
+    })
+
+    it('isConfigured respects OLLAMA_DISABLED for ollama provider', async () => {
+      const { OLLAMA_DISABLED } = await import('@/stores/settings')
+      const store = useSettingsStore()
+      store.setProvider('ollama')
+      if (OLLAMA_DISABLED) {
+        expect(store.isConfigured).toBe(false)
+      } else {
+        expect(store.isConfigured).toBe(true)
+      }
+    })
+  })
 })

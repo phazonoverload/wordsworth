@@ -6,6 +6,7 @@ export type ProviderId = 'openai' | 'anthropic' | 'google' | 'ollama'
 
 export const DEFAULT_OLLAMA_BASE_URL = 'http://localhost:11434'
 export const DEFAULT_OLLAMA_MODEL = 'llama3.1:8b'
+export const OLLAMA_DISABLED = !!import.meta.env.VITE_DISABLE_OLLAMA
 
 export interface ApiKeys {
   openai?: string
@@ -27,7 +28,7 @@ export const useSettingsStore = defineStore('settings', () => {
   )
 
   const isConfigured = computed(() => {
-    if (provider.value === 'ollama') return true
+    if (provider.value === 'ollama') return !OLLAMA_DISABLED
     const k = keys.value[provider.value as keyof ApiKeys]
     return !!k && k.length > 0
   })

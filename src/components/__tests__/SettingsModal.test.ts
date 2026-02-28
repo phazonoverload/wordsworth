@@ -1,8 +1,20 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import SettingsModal from '../SettingsModal.vue'
 import { useSettingsStore } from '@/stores/settings'
+
+const mockFlags = vi.hoisted(() => ({ ollamaDisabled: false }))
+
+vi.mock('@/stores/settings', async () => {
+  const actual = await vi.importActual<typeof import('@/stores/settings')>('@/stores/settings')
+  return {
+    ...actual,
+    get OLLAMA_DISABLED() {
+      return mockFlags.ollamaDisabled
+    },
+  }
+})
 
 const mountModal = (props: { modelValue: boolean } = { modelValue: true }) =>
   mount(SettingsModal, {
@@ -223,6 +235,37 @@ describe('SettingsModal', () => {
       expect(wrapper.find('[data-testid="ollama-model-input"]').exists()).toBe(false)
       expect(wrapper.find('[data-testid="ollama-base-url-input"]').exists()).toBe(false)
       expect(wrapper.find('[data-testid="key-input"]').exists()).toBe(true)
+    })
+
+    describe('when OLLAMA_DISABLED is true', () => {
+      beforeEach(() => {
+        mockFlags.ollamaDisabled = true
+      })
+
+      afterEach(() => {
+        mockFlags.ollamaDisabled = false
+      })
+
+      it('shows disabled message instead of Ollama config inputs', async () => {
+        const wrapper = mountModal()
+        await wrapper.find('[data-testid="provider-btn-ollama"]').trigger('click')
+        await wrapper.vm.$nextTick()
+
+        expect(wrapper.find('[data-testid="ollama-disabled-message"]').exists()).toBe(true)
+        expect(wrapper.find('[data-testid="ollama-model-input"]').exists()).toBe(false)
+        expect(wrapper.find('[data-testid="ollama-base-url-input"]').exists()).toBe(false)
+      })
+
+      it('disabled message contains link to README', async () => {
+        const wrapper = mountModal()
+        await wrapper.find('[data-testid="provider-btn-ollama"]').trigger('click')
+        await wrapper.vm.$nextTick()
+
+        const link = wrapper.find('[data-testid="ollama-readme-link"]')
+        expect(link.exists()).toBe(true)
+        expect(link.attributes('href')).toContain('github.com/phazonoverload/wordsworth')
+        expect(link.attributes('href')).toContain('#using-ollama-local-models')
+      })
     })
   })
 })

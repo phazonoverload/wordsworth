@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useSettingsStore } from '@/stores/settings'
-import { DEFAULT_OLLAMA_BASE_URL, DEFAULT_OLLAMA_MODEL } from '@/stores/settings'
+import { DEFAULT_OLLAMA_BASE_URL, DEFAULT_OLLAMA_MODEL, OLLAMA_DISABLED } from '@/stores/settings'
 import type { ProviderId, ApiKeys } from '@/stores/settings'
 
 const props = defineProps<{ modelValue: boolean }>()
@@ -131,7 +131,23 @@ function onKeydown(event: KeyboardEvent) {
 
           <!-- Ollama-specific settings -->
           <template v-if="isOllama">
-            <div class="space-y-4">
+            <div v-if="OLLAMA_DISABLED" data-testid="ollama-disabled-message" class="rounded-lg border border-amber-200 bg-amber-50 p-4 space-y-2">
+              <p class="text-sm text-amber-800">
+                Ollama requires a local server and cannot be used in a hosted environment.
+              </p>
+              <p class="text-sm text-amber-700">
+                Please run Wordsworth locally and follow the
+                <a
+                  data-testid="ollama-readme-link"
+                  href="https://github.com/phazonoverload/wordsworth#using-ollama-local-models"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="font-medium underline hover:text-amber-900"
+                >instructions in the README</a>
+                to use locally-hosted models with Ollama.
+              </p>
+            </div>
+            <div v-else class="space-y-4">
               <!-- Model name input -->
               <div class="space-y-2">
                 <h3 class="text-sm font-medium text-gray-700">Model</h3>

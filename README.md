@@ -72,3 +72,5 @@ If you'd rather run AI features against a local model instead of a cloud API, yo
 5. The base URL defaults to `http://localhost:11434` -- change it if Ollama is running on a different host or port.
 
 No API key is needed. Ollama requests go directly from your browser to the local Ollama server, bypassing the Netlify proxy entirely. Smaller models may produce lower-quality results for complex tasks like promise tracking, but work well for style fixes and audience assessment.
+
+> **Note:** On the hosted version of Wordsworth, Ollama is disabled since it requires a local server. To use Ollama, clone the repo and run locally with `netlify dev`. If you're deploying your own instance, set the `VITE_DISABLE_OLLAMA` environment variable to `true` in your Netlify dashboard to show a "run locally" message instead of the Ollama configuration inputs.
