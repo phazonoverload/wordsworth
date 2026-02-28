@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue'
 import { useSettingsStore } from '@/stores/settings'
 import { DEFAULT_OLLAMA_BASE_URL, DEFAULT_OLLAMA_MODEL } from '@/stores/settings'
-import type { ProviderId } from '@/stores/settings'
+import type { ProviderId, ApiKeys } from '@/stores/settings'
 
 const props = defineProps<{ modelValue: boolean }>()
 const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
@@ -175,7 +175,7 @@ function onKeydown(event: KeyboardEvent) {
               <input
                 data-testid="key-input"
                 :type="showKey ? 'text' : 'password'"
-                :value="settingsStore.keys[settingsStore.provider as ProviderId] ?? ''"
+                :value="settingsStore.keys[settingsStore.provider as keyof ApiKeys] ?? ''"
                 :placeholder="`${currentProvider!.label} API key`"
                 class="flex-1 border border-gray-300 rounded px-3 py-1.5 text-sm bg-white text-gray-900"
                 @input="onKeyInput(settingsStore.provider as ProviderId, $event)"
