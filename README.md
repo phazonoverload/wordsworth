@@ -48,9 +48,17 @@ This AI-powered tool reads through your document and identifies claims or promis
 
 The result shows a summary count (e.g. "2 of 3 promises fulfilled") followed by each promise with a color-coded verdict -- green for pass, red for fail, yellow for partial. Requires an AI API key.
 
+<h3><img src="docs/images/cut-by-20.png" alt="Cut by 20%. Trim the fat without losing meaning."></h3>
+
+Answers the question: _can this be shorter without losing anything important?_
+
+This AI-powered tool sends your document to an LLM with a single directive: cut approximately 20% of the word count while preserving technical accuracy and meaning. If you have a target audience configured, the model factors that in when deciding what to trim -- it won't cut context that your readers need.
+
+The result shows original and edited word counts with the reduction percentage, followed by a list of individual edit chunks. Each chunk displays the original text (struck through, red) alongside the condensed replacement (green), with a brief reason for the cut. You review each suggestion independently -- Accept applies the edit to your document immediately, Reject keeps the original, and Highlight scrolls to the relevant passage in the editor. Requires an AI API key.
+
 ## Running locally
 
-Most tools (Readability, Style Check, Pronouns, Header Shift) run entirely in the browser with no backend. The AI-powered features (audience assessment, style fixes, promise tracking) route through a Netlify Functions proxy at `netlify/functions/ai-proxy.mts`, so you need to use the Netlify CLI to run the dev server:
+Most tools (Readability, Style Check, Pronouns, Header Shift) run entirely in the browser with no backend. The AI-powered features (audience assessment, style fixes, promise tracking, cut by 20%) route through a Netlify Functions proxy at `netlify/functions/ai-proxy.mts`, so you need to use the Netlify CLI to run the dev server:
 
 ```
 npm install
