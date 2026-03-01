@@ -1,4 +1,4 @@
-export type ToolId = 'readability' | 'style-check' | 'pronouns' | 'cut-twenty' | 'promise-tracker' | 'header-shift'
+export type ToolId = 'readability' | 'style-check' | 'pronouns' | 'cut-twenty' | 'promise-tracker' | 'header-shift' | 'parallel-structure'
 
 export type ToolCategory = 'analysis' | 'ai'
 
@@ -40,6 +40,12 @@ export const TOOLS: ToolDefinition[] = [
 		label: 'Promises',
 		category: 'ai',
 		description: 'Check if intro promises are delivered in conclusion',
+	},
+	{
+		id: 'parallel-structure',
+		label: 'Parallel Structure',
+		category: 'analysis',
+		description: 'Find lists where items don\'t follow the same grammatical pattern',
 	},
 ]
 
@@ -138,6 +144,44 @@ export interface ShiftResult {
 	shifted: number
 }
 
+export type ListItemPattern = 'imperative' | 'gerund' | 'infinitive' | 'noun-phrase' | 'sentence' | 'other'
+
+export interface ParallelStructureItem {
+	line: number
+	text: string
+	pattern: ListItemPattern
+	capitalized: boolean
+	trailingPunctuation: string
+}
+
+export interface ParallelStructureList {
+	startLine: number
+	items: ParallelStructureItem[]
+	dominantPattern: ListItemPattern
+	dominantCapitalization: boolean
+	dominantPunctuation: string
+	isConsistent: boolean
+}
+
+export type ParallelStructureIssueKind = 'pattern' | 'capitalization' | 'punctuation'
+
+export interface ParallelStructureIssue {
+	listIndex: number
+	itemIndex: number
+	itemLine: number
+	itemAbsoluteOffset: number
+	itemLength: number
+	kind: ParallelStructureIssueKind
+	message: string
+	suggestion?: string
+}
+
+export interface ParallelStructureResult {
+	type: 'parallel-structure'
+	lists: ParallelStructureList[]
+	issues: ParallelStructureIssue[]
+}
+
 export type ToolResult =
 	| ReadabilityResult
 	| StyleCheckResult
@@ -145,6 +189,7 @@ export type ToolResult =
 	| CutResult
 	| PromiseResult
 	| HeaderShiftResult
+	| ParallelStructureResult
 
 export interface ToolRun {
 	toolId: ToolId
