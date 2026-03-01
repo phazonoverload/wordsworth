@@ -9,7 +9,7 @@ import { useToolStore } from '@/stores/tools'
 import { EditorState, StateField, StateEffect, RangeSet } from '@codemirror/state'
 import { EditorView, Decoration, lineNumbers, placeholder } from '@codemirror/view'
 import { markdown } from '@codemirror/lang-markdown'
-import type { PronounMatch, PronounCounts } from '@/tools/types'
+import type { PronounMatch, PronounCounts, HedgeGroup, HedgeMatch } from '@/tools/types'
 
 const setHighlightEffect = StateEffect.define<{ from: number; to: number } | null>()
 
@@ -54,6 +54,18 @@ const pronounMarkDecorations: Record<keyof PronounCounts, Decoration> = {
   we: Decoration.mark({ class: 'cm-pronoun-we' }),
 }
 
+const HEDGE_COLORS: Record<HedgeGroup, string> = {
+  uncertainty: '#fed7aa', // orange-200
+  frequency: '#fde68a',  // amber-200
+  softener: '#fecdd3',   // rose-200
+}
+
+const hedgeMarkDecorations: Record<HedgeGroup, Decoration> = {
+  uncertainty: Decoration.mark({ class: 'cm-hedge-uncertainty' }),
+  frequency: Decoration.mark({ class: 'cm-hedge-frequency' }),
+  softener: Decoration.mark({ class: 'cm-hedge-softener' }),
+}
+
 const setPronounHighlightsEffect = StateEffect.define<PronounMatch[]>()
 
 const pronounHighlightField = StateField.define<RangeSet<Decoration>>({
@@ -69,6 +81,57 @@ const pronounHighlightField = StateField.define<RangeSet<Decoration>>({
         const ranges = matches
           .filter(m => m.from < docLen && m.to <= docLen)
           .map(m => pronounMarkDecorations[m.group].range(m.from, m.to))
+          .sort((a, b) => a.from - b.from)
+        return RangeSet.of(ranges)
+      }
+    }
+
+    if (tr.docChanged) {
+      // Remove highlights that overlap with edited regions; keep the rest mapped to new positions
+      let mapped = decorations.map(tr.changes)
+      // Check each changed range and remove any decorations that overlap
+      const rangesToRemove: { from: number; to: number }[] = []
+      tr.changes.iterChangedRanges((_fromOld, _toOld, fromNew, toNew) => {
+        rangesToRemove.push({ from: fromNew, to: toNew })
+      })
+      if (rangesToRemove.length > 0) {
+        const kept: { from: number; to: number; value: Decoration }[] = []
+        const cursor = mapped.iter()
+        while (cursor.value) {
+          const decoFrom = cursor.from
+          const decoTo = cursor.to
+          const overlaps = rangesToRemove.some(
+            r => decoFrom < r.to && decoTo > r.from,
+          )
+          if (!overlaps) {
+            kept.push({ from: decoFrom, to: decoTo, value: cursor.value })
+          }
+          cursor.next()
+        }
+        return RangeSet.of(kept.map(k => k.value.range(k.from, k.to)))
+      }
+      return mapped
+    }
+    return decorations
+  },
+  provide: (field) => EditorView.decorations.from(field),
+})
+
+const setHedgeHighlightsEffect = StateEffect.define<HedgeMatch[]>()
+
+const hedgeHighlightField = StateField.define<RangeSet<Decoration>>({
+  create() {
+    return RangeSet.empty
+  },
+  update(decorations, tr) {
+    for (const effect of tr.effects) {
+      if (effect.is(setHedgeHighlightsEffect)) {
+        const matches = effect.value
+        if (matches.length === 0) return RangeSet.empty
+        const docLen = tr.state.doc.length
+        const ranges = matches
+          .filter(m => m.from < docLen && m.to <= docLen)
+          .map(m => hedgeMarkDecorations[m.group].range(m.from, m.to))
           .sort((a, b) => a.from - b.from)
         return RangeSet.of(ranges)
       }
@@ -148,6 +211,18 @@ const theme = EditorView.theme({
     backgroundColor: PRONOUN_COLORS.we,
     borderRadius: '2px',
   },
+  '.cm-hedge-uncertainty': {
+    backgroundColor: HEDGE_COLORS.uncertainty,
+    borderRadius: '2px',
+  },
+  '.cm-hedge-frequency': {
+    backgroundColor: HEDGE_COLORS.frequency,
+    borderRadius: '2px',
+  },
+  '.cm-hedge-softener': {
+    backgroundColor: HEDGE_COLORS.softener,
+    borderRadius: '2px',
+  },
 })
 
 const updateListener = EditorView.updateListener.of((update) => {
@@ -176,6 +251,7 @@ onMounted(() => {
       updateListener,
       highlightField,
       pronounHighlightField,
+      hedgeHighlightField,
       placeholder('Paste markdown here'),
     ],
   })
@@ -240,6 +316,16 @@ watch(
     if (!view) return
     view.dispatch({
       effects: setPronounHighlightsEffect.of(matches),
+    })
+  },
+)
+
+watch(
+  () => toolStore.hedgeHighlights,
+  (matches) => {
+    if (!view) return
+    view.dispatch({
+      effects: setHedgeHighlightsEffect.of(matches),
     })
   },
 )
