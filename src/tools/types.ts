@@ -43,19 +43,19 @@ export const TOOLS: ToolDefinition[] = [
 	},
 	{
 		id: 'parallel-structure',
-		label: 'Parallel Structure',
+		label: 'List Consistency',
 		category: 'analysis',
 		description: 'Find lists where items don\'t follow the same grammatical pattern',
 	},
 	{
 		id: 'acronym-checker',
-		label: 'Acronym Checker',
+		label: 'Acronyms',
 		category: 'analysis',
 		description: 'Find acronyms that aren\'t expanded on first use',
 	},
 	{
 		id: 'hedge-words',
-		label: 'Hedge Words',
+		label: 'Hedges',
 		category: 'analysis',
 		description: 'Find hedging language that weakens confident technical writing',
 	},

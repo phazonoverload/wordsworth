@@ -29,8 +29,7 @@ function isRunDisabled(): boolean {
   return false
 }
 
-function onSelect(event: Event) {
-  const id = (event.target as HTMLSelectElement).value as ToolId
+function onSelect(id: ToolId) {
   toolStore.setActiveTool(id)
   const tool = TOOLS.find(t => t.id === id)
   if (tool && tool.category !== 'ai') {
@@ -47,17 +46,23 @@ function onRun() {
 
 <template>
   <div class="tool-selector flex flex-col gap-2">
-    <select
-      :value="toolStore.activeTool ?? ''"
-      :disabled="toolStore.isRunning"
-      class="flex-1 min-w-0 rounded border border-gray-200 bg-white px-2 py-1.5 text-sm text-gray-700 outline-none focus:border-orange-400 disabled:opacity-50"
-      @change="onSelect"
-    >
-      <option value="" disabled>Select a tool...</option>
-      <option v-for="tool in TOOLS" :key="tool.id" :value="tool.id">
+    <div class="grid grid-cols-3 gap-1.5">
+      <button
+        v-for="tool in TOOLS"
+        :key="tool.id"
+        :disabled="toolStore.isRunning"
+        :class="[
+          'cursor-pointer rounded border px-2 py-1.5 text-xs font-medium transition',
+          toolStore.activeTool === tool.id
+            ? 'border-orange-400 bg-orange-50 text-orange-700'
+            : 'border-gray-200 bg-white text-gray-700 hover:border-orange-300 hover:bg-orange-50',
+          'disabled:cursor-not-allowed disabled:opacity-50',
+        ]"
+        @click="onSelect(tool.id)"
+      >
         {{ tool.label }}
-      </option>
-    </select>
+      </button>
+    </div>
     <p v-if="activeDef()" class="text-xs text-gray-400">{{ activeDef()!.description }}</p>
     <button
       v-if="showAiButton()"
