@@ -59,6 +59,15 @@ vi.mock('@/tools/parallel-structure', () => ({
   })),
 }))
 
+vi.mock('@/tools/acronym-checker', () => ({
+  checkAcronyms: vi.fn(() => ({
+    type: 'acronym-checker',
+    acronyms: [],
+    totalAcronymsFound: 0,
+    allExpanded: true,
+  })),
+}))
+
 import { runTool } from '@/tools/runner'
 import { analyzeReadability } from '@/tools/readability'
 import { checkStyle } from '@/tools/style-check'
@@ -66,6 +75,7 @@ import { analyzePronouns } from '@/tools/pronouns'
 import { cutTwenty } from '@/tools/cut-twenty'
 import { trackPromises } from '@/tools/promise-tracker'
 import { checkParallelStructure } from '@/tools/parallel-structure'
+import { checkAcronyms } from '@/tools/acronym-checker'
 
 describe('runTool', () => {
   beforeEach(() => {
@@ -177,6 +187,19 @@ describe('runTool', () => {
     expect(checkParallelStructure).toHaveBeenCalledWith('- Install the package\n- Running the tests')
     expect(toolStore.result).not.toBeNull()
     expect(toolStore.result!.type).toBe('parallel-structure')
+  })
+
+  it('dispatches to checkAcronyms', async () => {
+    const toolStore = useToolStore()
+    const docStore = useDocumentStore()
+    docStore.setContent('The API is fast.')
+    toolStore.setActiveTool('acronym-checker')
+
+    await runTool()
+
+    expect(checkAcronyms).toHaveBeenCalledWith('The API is fast.')
+    expect(toolStore.result).not.toBeNull()
+    expect(toolStore.result!.type).toBe('acronym-checker')
   })
 
   it('sets isRunning to true before execution and false after', async () => {

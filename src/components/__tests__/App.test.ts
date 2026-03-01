@@ -44,9 +44,8 @@ describe('App', () => {
 
   it('renders a settings button', () => {
     const wrapper = mountApp()
-    const button = wrapper.find('button')
+    const button = wrapper.find('button[aria-label="Settings"]')
     expect(button.exists()).toBe(true)
-    expect(button.text().toLowerCase()).toContain('settings')
   })
 
   it('opens SettingsModal when settings button is clicked', async () => {

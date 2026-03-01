@@ -28,6 +28,7 @@ useAutoRun()
           <Github class="w-4 h-4" />
         </a>
         <button
+          aria-label="Settings"
           class="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
           @click="showSettings = true"
         >

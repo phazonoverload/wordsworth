@@ -1,4 +1,4 @@
-export type ToolId = 'readability' | 'style-check' | 'pronouns' | 'cut-twenty' | 'promise-tracker' | 'header-shift' | 'parallel-structure'
+export type ToolId = 'readability' | 'style-check' | 'pronouns' | 'cut-twenty' | 'promise-tracker' | 'header-shift' | 'parallel-structure' | 'acronym-checker'
 
 export type ToolCategory = 'analysis' | 'ai'
 
@@ -46,6 +46,12 @@ export const TOOLS: ToolDefinition[] = [
 		label: 'Parallel Structure',
 		category: 'analysis',
 		description: 'Find lists where items don\'t follow the same grammatical pattern',
+	},
+	{
+		id: 'acronym-checker',
+		label: 'Acronym Checker',
+		category: 'analysis',
+		description: 'Find acronyms that aren\'t expanded on first use',
 	},
 ]
 
@@ -182,6 +188,23 @@ export interface ParallelStructureResult {
 	issues: ParallelStructureIssue[]
 }
 
+export interface AcronymIssue {
+	acronym: string
+	line: number
+	absoluteOffset: number
+	length: number
+	count: number
+	firstExpanded: boolean
+	dismissed: boolean
+}
+
+export interface AcronymCheckerResult {
+	type: 'acronym-checker'
+	acronyms: AcronymIssue[]
+	totalAcronymsFound: number
+	allExpanded: boolean
+}
+
 export type ToolResult =
 	| ReadabilityResult
 	| StyleCheckResult
@@ -190,6 +213,7 @@ export type ToolResult =
 	| PromiseResult
 	| HeaderShiftResult
 	| ParallelStructureResult
+	| AcronymCheckerResult
 
 export interface ToolRun {
 	toolId: ToolId
