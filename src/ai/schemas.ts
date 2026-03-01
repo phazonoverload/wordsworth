@@ -53,6 +53,20 @@ export const SCHEMAS = {
         'A one-paragraph assessment of whether the writing is well-suited for the target audience, considering domain-appropriate jargon, sentence complexity, and assumed knowledge'
       ),
   }),
+  'fix-parallel-single': z.object({
+    editedItem: z
+      .string()
+      .describe(
+        'The list item rewritten to match the target pattern, capitalization, and punctuation'
+      ),
+  }),
+  'fix-parallel-all': z.object({
+    editedDocument: z
+      .string()
+      .describe(
+        'The full document with all flagged list items rewritten for parallel structure'
+      ),
+  }),
 } as const
 
 export type ActionId = keyof typeof SCHEMAS
