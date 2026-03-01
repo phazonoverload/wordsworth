@@ -46,13 +46,13 @@ function onRun() {
 
 <template>
   <div class="tool-selector flex flex-col gap-2">
-    <div class="grid grid-cols-3 gap-1.5">
+    <div class="flex gap-1.5 overflow-x-auto md:grid md:grid-cols-3">
       <button
         v-for="tool in TOOLS"
         :key="tool.id"
         :disabled="toolStore.isRunning"
         :class="[
-          'cursor-pointer rounded border px-2 py-1.5 text-xs font-medium transition',
+          'shrink-0 cursor-pointer whitespace-nowrap rounded border px-2 py-1.5 text-xs font-medium transition',
           toolStore.activeTool === tool.id
             ? 'border-orange-400 bg-orange-50 text-orange-700'
             : 'border-gray-200 bg-white text-gray-700 hover:border-orange-300 hover:bg-orange-50',
@@ -63,7 +63,7 @@ function onRun() {
         {{ tool.label }}
       </button>
     </div>
-    <p v-if="activeDef()" class="text-xs text-gray-400">{{ activeDef()!.description }}</p>
+    <p v-if="activeDef()" class="hidden text-xs text-gray-400 md:block">{{ activeDef()!.description }}</p>
     <button
       v-if="showAiButton()"
       :disabled="isRunDisabled()"

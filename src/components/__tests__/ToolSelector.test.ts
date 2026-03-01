@@ -16,19 +16,27 @@ describe('ToolSelector', () => {
 		vi.clearAllMocks()
 	})
 
-	it('renders all 9 tools as buttons in a grid', () => {
+	it('renders all 9 tools as buttons that become a 3x3 grid on desktop', () => {
 		const wrapper = mount(ToolSelector)
-		const grid = wrapper.find('.grid')
-		expect(grid.exists()).toBe(true)
-		expect(grid.classes()).toContain('grid-cols-3')
-		const buttons = grid.findAll('button')
+		const container = wrapper.find('.tool-selector > div')
+		expect(container.exists()).toBe(true)
+		expect(container.classes()).toContain('md:grid')
+		expect(container.classes()).toContain('md:grid-cols-3')
+		const buttons = container.findAll('button')
 		expect(buttons).toHaveLength(9)
+	})
+
+	it('renders as a horizontally-scrollable row on mobile', () => {
+		const wrapper = mount(ToolSelector)
+		const container = wrapper.find('.tool-selector > div')
+		expect(container.classes()).toContain('flex')
+		expect(container.classes()).toContain('overflow-x-auto')
 	})
 
 	it('displays tool labels on the buttons', () => {
 		const wrapper = mount(ToolSelector)
-		const grid = wrapper.find('.grid')
-		const text = grid.text()
+		const container = wrapper.find('.tool-selector > div')
+		const text = container.text()
 		expect(text).toContain('Readability')
 		expect(text).toContain('Style Check')
 		expect(text).toContain('Pronouns')
@@ -42,8 +50,8 @@ describe('ToolSelector', () => {
 		const store = useToolStore()
 		const spy = vi.spyOn(store, 'setActiveTool')
 
-		const grid = wrapper.find('.grid')
-		const readabilityBtn = grid.findAll('button').find(b => b.text() === 'Readability')!
+		const container = wrapper.find('.tool-selector > div')
+		const readabilityBtn = container.findAll('button').find(b => b.text() === 'Readability')!
 		await readabilityBtn.trigger('click')
 
 		expect(spy).toHaveBeenCalledWith('readability')
@@ -55,8 +63,8 @@ describe('ToolSelector', () => {
 		store.setActiveTool('style-check')
 
 		const wrapper = mount(ToolSelector)
-		const grid = wrapper.find('.grid')
-		const styleBtn = grid.findAll('button').find(b => b.text() === 'Style Check')!
+		const container = wrapper.find('.tool-selector > div')
+		const styleBtn = container.findAll('button').find(b => b.text() === 'Style Check')!
 		expect(styleBtn.classes()).toContain('border-orange-400')
 	})
 
@@ -65,8 +73,8 @@ describe('ToolSelector', () => {
 		store.setRunning(true)
 
 		const wrapper = mount(ToolSelector)
-		const grid = wrapper.find('.grid')
-		const buttons = grid.findAll('button')
+		const container = wrapper.find('.tool-selector > div')
+		const buttons = container.findAll('button')
 		for (const btn of buttons) {
 			expect(btn.attributes('disabled')).toBeDefined()
 		}
