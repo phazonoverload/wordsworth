@@ -58,6 +58,16 @@ Wordsworth finds sequences of two or more uppercase letters (API, HTML, SAML) an
 
 The result shows how many acronyms were found versus how many lack an expansion. Each unexpanded acronym is displayed as a card with a violet badge, usage count, and line number. Clicking a card highlights the first occurrence in the editor. If an acronym is intentionally unexpanded, you can dismiss it -- dismissed issues are hidden from the current results but reappear on the next run. A toggleable "detection details" panel at the bottom explains the heuristics so you know exactly what the tool looks for.
 
+<h3><img src="docs/images/hedge-words.png" alt="Hedge Words. See how tentative your writing sounds."></h3>
+
+Answers the question: _is my writing too tentative or wishy-washy?_
+
+Wordsworth scans your prose for hedging language -- words and phrases that soften assertions or introduce unnecessary uncertainty. It detects three groups: **uncertainty hedges** (might, could, may, perhaps, possibly, conceivably, presumably), **frequency hedges** (generally, usually, often, sometimes, occasionally, typically, normally, frequently, rarely, seldom), and **softeners** (somewhat, fairly, rather, quite, slightly, relatively, arguably, practically, essentially, basically, virtually).
+
+The result shows an overall tone assessment based on hedge density -- from "fully assertive" (0%) through "balanced" (1-3%) to "heavily hedged" (5%+). Each group is displayed as a card with a count, a percentage-of-words bar, and an expandable list of matches. Clicking a match highlights it in the editor with a color-coded marker (orange for uncertainty, amber for frequency, rose for softeners). If a flagged word is intentional, you can dismiss it from the current results.
+
+Code blocks are excluded from analysis so inline examples don't produce false positives.
+
 <h3><img src="docs/images/promises.png" alt="Promises. Check if your intro delivers on its claims."></h3>
 
 Answers the question: _does your article deliver on what the introduction sets up?_
@@ -76,7 +86,7 @@ The result shows original and edited word counts with the reduction percentage, 
 
 ## Running locally
 
-Most tools (Readability, Style Check, Pronouns, Header Shift, Parallel Structure, Acronym Checker) run entirely in the browser with no backend. The AI-powered features (audience assessment, style fixes, parallel structure fixes, promise tracking, cut by 20%) route through a Netlify Functions proxy at `netlify/functions/ai-proxy.mts`, so you need to use the Netlify CLI to run the dev server:
+Most tools (Readability, Style Check, Pronouns, Header Shift, Parallel Structure, Acronym Checker, Hedge Words) run entirely in the browser with no backend. The AI-powered features (audience assessment, style fixes, parallel structure fixes, promise tracking, cut by 20%) route through a Netlify Functions proxy at `netlify/functions/ai-proxy.mts`, so you need to use the Netlify CLI to run the dev server:
 
 ```
 npm install
