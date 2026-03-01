@@ -1,4 +1,4 @@
-export type ToolId = 'readability' | 'style-check' | 'pronouns' | 'cut-twenty' | 'promise-tracker' | 'header-shift' | 'parallel-structure' | 'acronym-checker'
+export type ToolId = 'readability' | 'style-check' | 'pronouns' | 'cut-twenty' | 'promise-tracker' | 'header-shift' | 'parallel-structure' | 'acronym-checker' | 'hedge-words'
 
 export type ToolCategory = 'analysis' | 'ai'
 
@@ -52,6 +52,12 @@ export const TOOLS: ToolDefinition[] = [
 		label: 'Acronym Checker',
 		category: 'analysis',
 		description: 'Find acronyms that aren\'t expanded on first use',
+	},
+	{
+		id: 'hedge-words',
+		label: 'Hedge Words',
+		category: 'analysis',
+		description: 'Find hedging language that weakens confident technical writing',
 	},
 ]
 
@@ -205,6 +211,34 @@ export interface AcronymCheckerResult {
 	allExpanded: boolean
 }
 
+export type HedgeGroup = 'uncertainty' | 'frequency' | 'softener'
+
+export interface HedgeMatch {
+	from: number
+	to: number
+	word: string
+	group: HedgeGroup
+	line: number
+	dismissed: boolean
+}
+
+export interface HedgeWordCounts {
+	uncertainty: number
+	frequency: number
+	softener: number
+}
+
+export interface HedgeWordResult {
+	type: 'hedge-words'
+	matches: HedgeMatch[]
+	counts: HedgeWordCounts
+	total: number
+	wordCount: number
+	percentages: Record<HedgeGroup, number>
+	density: number
+	toneAssessment: string
+}
+
 export type ToolResult =
 	| ReadabilityResult
 	| StyleCheckResult
@@ -214,6 +248,7 @@ export type ToolResult =
 	| HeaderShiftResult
 	| ParallelStructureResult
 	| AcronymCheckerResult
+	| HedgeWordResult
 
 export interface ToolRun {
 	toolId: ToolId

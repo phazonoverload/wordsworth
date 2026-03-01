@@ -16,10 +16,10 @@ describe('ToolSelector', () => {
 		vi.clearAllMocks()
 	})
 
-	it('renders a select with all 8 tools as options', () => {
+	it('renders a select with all 9 tools as options', () => {
 		const wrapper = mount(ToolSelector)
 		const options = wrapper.findAll('option').filter(o => o.text() !== 'Select a tool...')
-		expect(options).toHaveLength(8)
+		expect(options).toHaveLength(9)
 	})
 
 	it('displays tool labels in select options', () => {
