@@ -51,12 +51,21 @@ vi.mock('@/tools/promise-tracker', () => ({
   })),
 }))
 
+vi.mock('@/tools/parallel-structure', () => ({
+  checkParallelStructure: vi.fn(() => ({
+    type: 'parallel-structure',
+    lists: [],
+    issues: [],
+  })),
+}))
+
 import { runTool } from '@/tools/runner'
 import { analyzeReadability } from '@/tools/readability'
 import { checkStyle } from '@/tools/style-check'
 import { analyzePronouns } from '@/tools/pronouns'
 import { cutTwenty } from '@/tools/cut-twenty'
 import { trackPromises } from '@/tools/promise-tracker'
+import { checkParallelStructure } from '@/tools/parallel-structure'
 
 describe('runTool', () => {
   beforeEach(() => {
@@ -155,6 +164,19 @@ describe('runTool', () => {
     expect(trackPromises).toHaveBeenCalledWith('This article will cover three topics.')
     expect(toolStore.result).not.toBeNull()
     expect(toolStore.result!.type).toBe('promise-tracker')
+  })
+
+  it('dispatches to checkParallelStructure', async () => {
+    const toolStore = useToolStore()
+    const docStore = useDocumentStore()
+    docStore.setContent('- Install the package\n- Running the tests')
+    toolStore.setActiveTool('parallel-structure')
+
+    await runTool()
+
+    expect(checkParallelStructure).toHaveBeenCalledWith('- Install the package\n- Running the tests')
+    expect(toolStore.result).not.toBeNull()
+    expect(toolStore.result!.type).toBe('parallel-structure')
   })
 
   it('sets isRunning to true before execution and false after', async () => {
