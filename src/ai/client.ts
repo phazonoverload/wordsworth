@@ -37,6 +37,8 @@ function schemaToJsonExample(action: ActionId): string {
       2
     ),
     'audience-assessment': JSON.stringify({ assessment: '...' }, null, 2),
+    'fix-parallel-single': JSON.stringify({ editedItem: '...' }, null, 2),
+    'fix-parallel-all': JSON.stringify({ editedDocument: '...' }, null, 2),
   }
   return examples[action]
 }

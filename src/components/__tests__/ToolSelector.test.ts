@@ -16,15 +16,27 @@ describe('ToolSelector', () => {
 		vi.clearAllMocks()
 	})
 
-	it('renders a select with all 6 tools as options', () => {
+	it('renders all 9 tools as buttons that become a 3x3 grid on desktop', () => {
 		const wrapper = mount(ToolSelector)
-		const options = wrapper.findAll('option').filter(o => o.text() !== 'Select a tool...')
-		expect(options).toHaveLength(6)
+		const container = wrapper.find('.tool-selector > div')
+		expect(container.exists()).toBe(true)
+		expect(container.classes()).toContain('md:grid')
+		expect(container.classes()).toContain('md:grid-cols-3')
+		const buttons = container.findAll('button')
+		expect(buttons).toHaveLength(9)
 	})
 
-	it('displays tool labels in select options', () => {
+	it('renders as a horizontally-scrollable row on mobile', () => {
 		const wrapper = mount(ToolSelector)
-		const text = wrapper.find('select').text()
+		const container = wrapper.find('.tool-selector > div')
+		expect(container.classes()).toContain('flex')
+		expect(container.classes()).toContain('overflow-x-auto')
+	})
+
+	it('displays tool labels on the buttons', () => {
+		const wrapper = mount(ToolSelector)
+		const container = wrapper.find('.tool-selector > div')
+		const text = container.text()
 		expect(text).toContain('Readability')
 		expect(text).toContain('Style Check')
 		expect(text).toContain('Pronouns')
@@ -33,37 +45,39 @@ describe('ToolSelector', () => {
 		expect(text).toContain('Promises')
 	})
 
-	it('renders options without optgroups', () => {
-		const wrapper = mount(ToolSelector)
-		expect(wrapper.findAll('optgroup')).toHaveLength(0)
-	})
-
-	it('calls setActiveTool and runTool when an analysis tool is selected', async () => {
+	it('calls setActiveTool and runTool when an analysis tool is clicked', async () => {
 		const wrapper = mount(ToolSelector)
 		const store = useToolStore()
 		const spy = vi.spyOn(store, 'setActiveTool')
 
-		await wrapper.find('select').setValue('readability')
+		const container = wrapper.find('.tool-selector > div')
+		const readabilityBtn = container.findAll('button').find(b => b.text() === 'Readability')!
+		await readabilityBtn.trigger('click')
 
 		expect(spy).toHaveBeenCalledWith('readability')
 		expect(runTool).toHaveBeenCalled()
 	})
 
-	it('sets the select value to the active tool', () => {
+	it('highlights the active tool button', () => {
 		const store = useToolStore()
 		store.setActiveTool('style-check')
 
 		const wrapper = mount(ToolSelector)
-		const select = wrapper.find('select').element as HTMLSelectElement
-		expect(select.value).toBe('style-check')
+		const container = wrapper.find('.tool-selector > div')
+		const styleBtn = container.findAll('button').find(b => b.text() === 'Style Check')!
+		expect(styleBtn.classes()).toContain('border-orange-400')
 	})
 
-	it('disables select when a tool is running', () => {
+	it('disables all buttons when a tool is running', () => {
 		const store = useToolStore()
 		store.setRunning(true)
 
 		const wrapper = mount(ToolSelector)
-		expect(wrapper.find('select').attributes('disabled')).toBeDefined()
+		const container = wrapper.find('.tool-selector > div')
+		const buttons = container.findAll('button')
+		for (const btn of buttons) {
+			expect(btn.attributes('disabled')).toBeDefined()
+		}
 	})
 
 	it('does not show Analyze with AI button for analysis tools', () => {
@@ -71,6 +85,8 @@ describe('ToolSelector', () => {
 		store.setActiveTool('readability')
 
 		const wrapper = mount(ToolSelector)
-		expect(wrapper.find('button').exists()).toBe(false)
+		const allButtons = wrapper.findAll('button')
+		const aiButton = allButtons.find(b => b.text() === 'Analyze with AI')
+		expect(aiButton).toBeUndefined()
 	})
 })

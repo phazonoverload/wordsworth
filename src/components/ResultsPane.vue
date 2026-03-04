@@ -9,6 +9,9 @@ import PronounResult from '@/components/results/PronounResult.vue'
 import CutResult from '@/components/results/CutResult.vue'
 import PromiseResult from '@/components/results/PromiseResult.vue'
 import HeaderShiftResult from '@/components/results/HeaderShiftResult.vue'
+import ParallelStructureResult from '@/components/results/ParallelStructureResult.vue'
+import AcronymCheckerResult from '@/components/results/AcronymCheckerResult.vue'
+import HedgeWordResult from '@/components/results/HedgeWordResult.vue'
 import type { CutResult as CutResultType } from '@/tools/types'
 
 const toolStore = useToolStore()
@@ -56,6 +59,9 @@ function onRejectChunk(chunkId: string) {
       <CutResult v-else-if="toolStore.result.type === 'cut-twenty'" :result="toolStore.result" @accept="onAcceptChunk" @reject="onRejectChunk" />
       <PromiseResult v-else-if="toolStore.result.type === 'promise-tracker'" :result="toolStore.result" />
       <HeaderShiftResult v-else-if="toolStore.result.type === 'header-shift'" :result="toolStore.result" />
+      <ParallelStructureResult v-else-if="toolStore.result.type === 'parallel-structure'" :result="toolStore.result" />
+      <AcronymCheckerResult v-else-if="toolStore.result.type === 'acronym-checker'" :result="toolStore.result" />
+      <HedgeWordResult v-else-if="toolStore.result.type === 'hedge-words'" :result="toolStore.result" />
     </div>
   </div>
 </template>

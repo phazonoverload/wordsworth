@@ -40,6 +40,34 @@ Bulk-shifts all Markdown header levels up or down by one. Promote turns every H2
 
 This is useful when embedding content into a larger site where the page title occupies H1, so your document headings need to drop a level. The tool shows a breakdown of how many headers exist at each level (H1-H6), blocks unsafe operations (promoting when an H1 already exists, demoting when an H6 exists), and provides an undo button to revert the last shift.
 
+<h3><img src="docs/images/parallel-structure.png" alt="List Consistency. Make your lists consistent."></h3>
+
+Answers the question: _are my bullet lists grammatically consistent?_
+
+Wordsworth scans every Markdown list in your document -- both ordered and unordered -- and classifies each item by its grammatical opening: imperative verb ("Install the package"), gerund ("Installing the package"), infinitive ("To install the package"), noun phrase ("The package"), or full sentence ("You install the package"). It also tracks whether items are capitalized and whether they end with punctuation.
+
+When items in the same list don't match, the tool flags the outliers. Each issue is categorized as a pattern mismatch, a capitalization inconsistency, or a punctuation inconsistency, and shows the line number and the offending text. Clicking an issue highlights it in the editor. If you have an AI API key configured, you can fix individual issues or all issues at once -- the AI rewrites the inconsistent items to match the dominant pattern.
+
+Code blocks are excluded from analysis so fenced examples don't produce false positives.
+
+<h3><img src="docs/images/acronym-checker.png" alt="Acronyms. Find acronyms that aren't expanded on first use."></h3>
+
+Answers the question: _did I introduce every acronym before using it?_
+
+Wordsworth finds sequences of two or more uppercase letters (API, HTML, SAML) and checks whether each one is expanded on first use. It recognizes three expansion patterns: parenthetical definition ("Application Programming Interface (API)"), reverse parenthetical ("API (Application Programming Interface)"), and inline definition ("API, or Application Programming Interface"). Common abbreviations like OK, US, AM/PM, and ID are skipped automatically, and text inside code blocks is excluded.
+
+The result shows how many acronyms were found versus how many lack an expansion. Each unexpanded acronym is displayed as a card with a violet badge, usage count, and line number. Clicking a card highlights the first occurrence in the editor. If an acronym is intentionally unexpanded, you can dismiss it -- dismissed issues are hidden from the current results but reappear on the next run. A toggleable "detection details" panel at the bottom explains the heuristics so you know exactly what the tool looks for.
+
+<h3><img src="docs/images/hedge-words.png" alt="Hedges. See how tentative your writing sounds."></h3>
+
+Answers the question: _is my writing too tentative or wishy-washy?_
+
+Wordsworth scans your prose for hedging language -- words and phrases that soften assertions or introduce unnecessary uncertainty. It detects three groups: **uncertainty hedges** (might, could, may, perhaps, possibly, conceivably, presumably), **frequency hedges** (generally, usually, often, sometimes, occasionally, typically, normally, frequently, rarely, seldom), and **softeners** (somewhat, fairly, rather, quite, slightly, relatively, arguably, practically, essentially, basically, virtually).
+
+The result shows an overall tone assessment based on hedge density -- from "fully assertive" (0%) through "balanced" (1-3%) to "heavily hedged" (5%+). Each group is displayed as a card with a count, a percentage-of-words bar, and an expandable list of matches. Clicking a match highlights it in the editor with a color-coded marker (orange for uncertainty, amber for frequency, rose for softeners). If a flagged word is intentional, you can dismiss it from the current results.
+
+Code blocks are excluded from analysis so inline examples don't produce false positives.
+
 <h3><img src="docs/images/promises.png" alt="Promises. Check if your intro delivers on its claims."></h3>
 
 Answers the question: _does your article deliver on what the introduction sets up?_
@@ -58,7 +86,7 @@ The result shows original and edited word counts with the reduction percentage, 
 
 ## Running locally
 
-Most tools (Readability, Style Check, Pronouns, Header Shift) run entirely in the browser with no backend. The AI-powered features (audience assessment, style fixes, promise tracking, cut by 20%) route through a Netlify Functions proxy at `netlify/functions/ai-proxy.mts`, so you need to use the Netlify CLI to run the dev server:
+Most tools (Readability, Style Check, Pronouns, Header Shift, List Consistency, Acronyms, Hedges) run entirely in the browser with no backend. The AI-powered features (audience assessment, style fixes, parallel structure fixes, promise tracking, cut by 20%) route through a Netlify Functions proxy at `netlify/functions/ai-proxy.mts`, so you need to use the Netlify CLI to run the dev server:
 
 ```
 npm install

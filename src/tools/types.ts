@@ -1,4 +1,4 @@
-export type ToolId = 'readability' | 'style-check' | 'pronouns' | 'cut-twenty' | 'promise-tracker' | 'header-shift'
+export type ToolId = 'readability' | 'style-check' | 'pronouns' | 'cut-twenty' | 'promise-tracker' | 'header-shift' | 'parallel-structure' | 'acronym-checker' | 'hedge-words'
 
 export type ToolCategory = 'analysis' | 'ai'
 
@@ -40,6 +40,24 @@ export const TOOLS: ToolDefinition[] = [
 		label: 'Promises',
 		category: 'ai',
 		description: 'Check if intro promises are delivered in conclusion',
+	},
+	{
+		id: 'parallel-structure',
+		label: 'List Consistency',
+		category: 'analysis',
+		description: 'Find lists where items don\'t follow the same grammatical pattern',
+	},
+	{
+		id: 'acronym-checker',
+		label: 'Acronyms',
+		category: 'analysis',
+		description: 'Find acronyms that aren\'t expanded on first use',
+	},
+	{
+		id: 'hedge-words',
+		label: 'Hedges',
+		category: 'analysis',
+		description: 'Find hedging language that weakens confident technical writing',
 	},
 ]
 
@@ -138,6 +156,89 @@ export interface ShiftResult {
 	shifted: number
 }
 
+export type ListItemPattern = 'imperative' | 'gerund' | 'infinitive' | 'noun-phrase' | 'sentence' | 'other'
+
+export interface ParallelStructureItem {
+	line: number
+	text: string
+	pattern: ListItemPattern
+	capitalized: boolean
+	trailingPunctuation: string
+}
+
+export interface ParallelStructureList {
+	startLine: number
+	items: ParallelStructureItem[]
+	dominantPattern: ListItemPattern
+	dominantCapitalization: boolean
+	dominantPunctuation: string
+	isConsistent: boolean
+}
+
+export type ParallelStructureIssueKind = 'pattern' | 'capitalization' | 'punctuation'
+
+export interface ParallelStructureIssue {
+	listIndex: number
+	itemIndex: number
+	itemLine: number
+	itemAbsoluteOffset: number
+	itemLength: number
+	kind: ParallelStructureIssueKind
+	message: string
+	suggestion?: string
+}
+
+export interface ParallelStructureResult {
+	type: 'parallel-structure'
+	lists: ParallelStructureList[]
+	issues: ParallelStructureIssue[]
+}
+
+export interface AcronymIssue {
+	acronym: string
+	line: number
+	absoluteOffset: number
+	length: number
+	count: number
+	firstExpanded: boolean
+	dismissed: boolean
+}
+
+export interface AcronymCheckerResult {
+	type: 'acronym-checker'
+	acronyms: AcronymIssue[]
+	totalAcronymsFound: number
+	allExpanded: boolean
+}
+
+export type HedgeGroup = 'uncertainty' | 'frequency' | 'softener'
+
+export interface HedgeMatch {
+	from: number
+	to: number
+	word: string
+	group: HedgeGroup
+	line: number
+	dismissed: boolean
+}
+
+export interface HedgeWordCounts {
+	uncertainty: number
+	frequency: number
+	softener: number
+}
+
+export interface HedgeWordResult {
+	type: 'hedge-words'
+	matches: HedgeMatch[]
+	counts: HedgeWordCounts
+	total: number
+	wordCount: number
+	percentages: Record<HedgeGroup, number>
+	density: number
+	toneAssessment: string
+}
+
 export type ToolResult =
 	| ReadabilityResult
 	| StyleCheckResult
@@ -145,6 +246,9 @@ export type ToolResult =
 	| CutResult
 	| PromiseResult
 	| HeaderShiftResult
+	| ParallelStructureResult
+	| AcronymCheckerResult
+	| HedgeWordResult
 
 export interface ToolRun {
 	toolId: ToolId

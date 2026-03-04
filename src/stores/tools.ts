@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { storage } from '@/lib/storage'
-import type { ToolId, ToolResult, ToolRun, PronounMatch } from '@/tools/types'
+import type { ToolId, ToolResult, ToolRun, PronounMatch, HedgeMatch } from '@/tools/types'
 
 export type HighlightRange = { from: number; to: number }
 
@@ -16,6 +16,7 @@ export const useToolStore = defineStore('tools', () => {
   const history = ref<ToolRun[]>(savedHistory ?? [])
   const highlightRange = ref<HighlightRange | null>(null)
   const pronounHighlights = ref<PronounMatch[]>([])
+  const hedgeHighlights = ref<HedgeMatch[]>([])
   const mergeOriginal = ref<string | null>(null)
   const mergeModified = ref<string | null>(null)
 
@@ -24,6 +25,7 @@ export const useToolStore = defineStore('tools', () => {
     result.value = null
     highlightRange.value = null
     pronounHighlights.value = []
+    hedgeHighlights.value = []
   }
 
   function setHighlightRange(range: HighlightRange) {
@@ -40,6 +42,14 @@ export const useToolStore = defineStore('tools', () => {
 
   function clearPronounHighlights() {
     pronounHighlights.value = []
+  }
+
+  function setHedgeHighlights(matches: HedgeMatch[]) {
+    hedgeHighlights.value = matches
+  }
+
+  function clearHedgeHighlights() {
+    hedgeHighlights.value = []
   }
 
   function setRunning(running: boolean) {
@@ -73,9 +83,11 @@ export const useToolStore = defineStore('tools', () => {
 
   return {
     activeTool, isRunning, result, history, highlightRange, pronounHighlights,
+    hedgeHighlights,
     mergeOriginal, mergeModified,
     setActiveTool, setRunning, setResult, setHighlightRange, clearHighlightRange,
     setPronounHighlights, clearPronounHighlights,
+    setHedgeHighlights, clearHedgeHighlights,
     setMergeState, clearMergeState,
   }
 })

@@ -6,6 +6,9 @@ import { analyzePronouns } from '@/tools/pronouns'
 import { cutTwenty } from '@/tools/cut-twenty'
 import { trackPromises } from '@/tools/promise-tracker'
 import { scanHeaders } from '@/tools/header-shift'
+import { checkParallelStructure } from '@/tools/parallel-structure'
+import { checkAcronyms } from '@/tools/acronym-checker'
+import { analyzeHedgeWords } from '@/tools/hedge-words'
 import type { ToolResult } from '@/tools/types'
 
 export async function runTool(): Promise<void> {
@@ -40,6 +43,15 @@ export async function runTool(): Promise<void> {
         break
       case 'header-shift':
         result = scanHeaders(content)
+        break
+      case 'parallel-structure':
+        result = checkParallelStructure(content)
+        break
+      case 'acronym-checker':
+        result = checkAcronyms(content)
+        break
+      case 'hedge-words':
+        result = analyzeHedgeWords(content)
         break
     }
 
