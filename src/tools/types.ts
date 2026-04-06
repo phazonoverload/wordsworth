@@ -22,7 +22,7 @@ export const TOOLS: ToolDefinition[] = [
 		category: 'analysis',
 		description: 'Passive voice, wordy phrases, inconsistent spelling & terminology',
 	},
-	{ id: 'pronouns', label: 'Pronouns', category: 'analysis', description: 'Pronoun frequency, tone assessment' },
+	{ id: 'pronouns', label: 'Pronouns', category: 'analysis', description: 'Who your writing addresses (I, you, we) — with frequency breakdown and tone assessment' },
 	{
 		id: 'header-shift',
 		label: 'Header Shift',
@@ -33,7 +33,7 @@ export const TOOLS: ToolDefinition[] = [
 		id: 'cut-twenty',
 		label: 'Cut 20%',
 		category: 'ai',
-		description: 'Trim text to ~80% length with diff review',
+		description: 'AI trims ~20% of your text while preserving meaning, with a diff review for each change',
 	},
 	{
 		id: 'promise-tracker',
