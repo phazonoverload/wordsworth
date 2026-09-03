@@ -3,9 +3,9 @@
 > [!TIP]
 > **Use as an agent skill:** `npx skills add phazonoverload/wordsworth`
 
-Wordsworth is a browser-based writing workbench for people who write technical content. Paste your Markdown into the editor, pick a tool, and get instant feedback on readability, style, and more.
+Wordsworth is a set of microtools for technical writers. It analyzes Markdown documents for readability, style, tone, and structure — flagging issues, suggesting improvements, and surfacing patterns that need attention.
 
-Most tools run entirely in the browser with no account or API key required. AI-powered features (audience assessment, style fixes) are bring-your-own-key -- enter an OpenAI, Anthropic, or Google API key in settings and requests go directly through a lightweight proxy. You can also use [Ollama](https://ollama.com) to run models locally with no API key or cloud account required. Nothing is stored server-side.
+All diagnostics run locally with no account or API key required. AI-powered features (audience assessment, style fixes, parallel structure fixes, promise tracking, cut by 20%) require an OpenAI, Anthropic, or Google API key.
 
 ## Tools
 
@@ -13,43 +13,31 @@ Most tools run entirely in the browser with no account or API key required. AI-p
 
 Answers the question: _is this pitched at the right level for my readers?_
 
-Wordsworth calculates three standard readability metrics from your text: Flesch-Kincaid score, Gunning Fog index, and an overall grade level. It also shows word count, sentence count, and estimated reading time.
-
-The grade level is displayed with a color-coded indicator -- green for grade 8 and below, yellow for 9-12, and red for 13+. A plain-English label (e.g. "middle school", "college") accompanies the number so you can quickly judge whether your writing matches your audience.
-
-Below the metrics, you can select a target audience from presets (Senior developers, Junior developers, Non-technical stakeholders, General audience) or write your own custom description. If you have an AI API key configured, an "Assess for audience with AI" button sends your document and audience description to an LLM, which returns a one-paragraph verdict on whether your jargon level, sentence complexity, and assumed knowledge are appropriate. The assessment considers context -- it won't penalise technical terminology when writing for a technical audience.
+Calculates three standard readability metrics — Flesch-Kincaid Reading Ease, Gunning Fog Index, and an overall grade level — plus word count, sentence count, and estimated reading time. A plain-English label (e.g. "middle school", "college") makes the grade level immediately interpretable.
 
 <h3><img src="docs/images/style-check.png" alt="Style Check. Passive voice, wordiness, and inconsistencies."></h3>
 
-Scans your prose for three categories of style issues:
+Scans prose for three categories of style issues:
 
 - **Passive voice** -- flags constructions like "was written" or "is being built" that weaken technical writing.
 - **Wordy phrases** -- catches verbose constructions ("in order to", "due to the fact that", "utilize") and suggests concise alternatives.
-- **Inconsistencies** -- detects mixed US/UK spelling ("color" vs "colour") and inconsistent terminology ("user" vs "customer" vs "client") within the same document, flagging the minority usage.
+- **Inconsistencies** -- detects mixed US/UK spelling and inconsistent terminology within the same document, flagging the minority usage.
 
-Each issue shows the line number, the flagged text, and a suggestion. Clicking an issue highlights the relevant line in the editor. If you have an AI API key configured, you can fix individual issues or all issues at once -- the AI rewrites the affected text and presents a diff for you to review and accept before anything changes.
+Each issue reports the line number, the flagged text, and a suggested fix. AI-powered fixes present a diff for review before applying any changes.
 
 <h3><img src="docs/images/pronouns.png" alt="Pronouns. See who your writing talks to."></h3>
 
-Reveals the pronoun balance in your writing by counting three groups: I/me/my, you/your, and we/us/our. It calculates percentages and produces a tone assessment -- from "strongly reader-focused" to "strongly author-focused" -- so you can see at a glance whether your docs talk _to_ the reader or _at_ them.
-
-All pronoun matches are highlighted inline in the editor with color-coded markers (blue for I-group, green for you-group, amber for we-group), making it easy to spot clusters.
-
-Technical documentation generally benefits from a reader-focused "you" voice. This tool makes the balance visible without you having to count anything.
+Counts personal pronouns across three groups (I/me/my, you/your, we/us/our) and produces a tone assessment — from "strongly reader-focused" to "strongly author-focused". Technical documentation generally benefits from a reader-focused "you" voice.
 
 <h3><img src="docs/images/header-shift.png" alt="Header Shift. Promote or demote all heading levels at once."></h3>
 
-Bulk-shifts all Markdown header levels up or down by one. Promote turns every H2 into H1, every H3 into H2, and so on. Demote does the reverse.
-
-This is useful when embedding content into a larger site where the page title occupies H1, so your document headings need to drop a level. The tool shows a breakdown of how many headers exist at each level (H1-H6), blocks unsafe operations (promoting when an H1 already exists, demoting when an H6 exists), and provides an undo button to revert the last shift.
+Bulk-shifts all Markdown header levels up or down by one. Useful when embedding content into a larger site where the page title occupies H1. Blocks unsafe operations (promoting when an H1 already exists, demoting when an H6 exists).
 
 <h3><img src="docs/images/parallel-structure.png" alt="List Consistency. Make your lists consistent."></h3>
 
 Answers the question: _are my bullet lists grammatically consistent?_
 
-Wordsworth scans every Markdown list in your document -- both ordered and unordered -- and classifies each item by its grammatical opening: imperative verb ("Install the package"), gerund ("Installing the package"), infinitive ("To install the package"), noun phrase ("The package"), or full sentence ("You install the package"). It also tracks whether items are capitalized and whether they end with punctuation.
-
-When items in the same list don't match, the tool flags the outliers. Each issue is categorized as a pattern mismatch, a capitalization inconsistency, or a punctuation inconsistency, and shows the line number and the offending text. Clicking an issue highlights it in the editor. If you have an AI API key configured, you can fix individual issues or all issues at once -- the AI rewrites the inconsistent items to match the dominant pattern.
+Classifies each Markdown list item by grammatical opening (imperative verb, gerund, infinitive, noun phrase, or full sentence) and tracks capitalization and punctuation patterns. Flags outliers that break the list's dominant pattern. AI-powered fixes rewrite inconsistent items to match the dominant pattern.
 
 Code blocks are excluded from analysis so fenced examples don't produce false positives.
 
@@ -57,59 +45,24 @@ Code blocks are excluded from analysis so fenced examples don't produce false po
 
 Answers the question: _did I introduce every acronym before using it?_
 
-Wordsworth finds sequences of two or more uppercase letters (API, HTML, SAML) and checks whether each one is expanded on first use. It recognizes three expansion patterns: parenthetical definition ("Application Programming Interface (API)"), reverse parenthetical ("API (Application Programming Interface)"), and inline definition ("API, or Application Programming Interface"). Common abbreviations like OK, US, AM/PM, and ID are skipped automatically, and text inside code blocks is excluded.
-
-The result shows how many acronyms were found versus how many lack an expansion. Each unexpanded acronym is displayed as a card with a violet badge, usage count, and line number. Clicking a card highlights the first occurrence in the editor. If an acronym is intentionally unexpanded, you can dismiss it -- dismissed issues are hidden from the current results but reappear on the next run. A toggleable "detection details" panel at the bottom explains the heuristics so you know exactly what the tool looks for.
+Finds sequences of two or more uppercase letters and checks whether each one is expanded on first use. Three expansion patterns are recognized: parenthetical definition ("Full Phrase (ACR)"), reverse parenthetical ("ACR (Full Phrase)"), and inline "or" definition ("ACR, or Full Phrase"). Common abbreviations (OK, US, AM/PM, ID) are skipped automatically. Code blocks are excluded.
 
 <h3><img src="docs/images/hedge-words.png" alt="Hedges. See how tentative your writing sounds."></h3>
 
 Answers the question: _is my writing too tentative or wishy-washy?_
 
-Wordsworth scans your prose for hedging language -- words and phrases that soften assertions or introduce unnecessary uncertainty. It detects three groups: **uncertainty hedges** (might, could, may, perhaps, possibly, conceivably, presumably), **frequency hedges** (generally, usually, often, sometimes, occasionally, typically, normally, frequently, rarely, seldom), and **softeners** (somewhat, fairly, rather, quite, slightly, relatively, arguably, practically, essentially, basically, virtually).
+Scans for hedging language across three groups: **uncertainty hedges** (might, could, may, perhaps, possibly, conceivably, presumably), **frequency hedges** (generally, usually, often, sometimes, occasionally, typically, normally, frequently, rarely, seldom), and **softeners** (somewhat, fairly, rather, quite, slightly, relatively, arguably, practically, essentially, basically, virtually). Reports an overall tone assessment based on hedge density.
 
-The result shows an overall tone assessment based on hedge density -- from "fully assertive" (0%) through "balanced" (1-3%) to "heavily hedged" (5%+). Each group is displayed as a card with a count, a percentage-of-words bar, and an expandable list of matches. Clicking a match highlights it in the editor with a color-coded marker (orange for uncertainty, amber for frequency, rose for softeners). If a flagged word is intentional, you can dismiss it from the current results.
-
-Code blocks are excluded from analysis so inline examples don't produce false positives.
+Code blocks are excluded from analysis.
 
 <h3><img src="docs/images/promises.png" alt="Promises. Check if your intro delivers on its claims."></h3>
 
 Answers the question: _does your article deliver on what the introduction sets up?_
 
-This AI-powered tool reads through your document and identifies claims or promises made in the opening paragraphs -- things like "this guide will show you how to..." or "by the end you'll understand...". It then checks whether each promise is actually fulfilled in the body and conclusion, returning a verdict of pass, fail, or partial for each one, along with evidence from the text.
-
-The result shows a summary count (e.g. "2 of 3 promises fulfilled") followed by each promise with a color-coded verdict -- green for pass, red for fail, yellow for partial. Requires an AI API key.
+AI-powered: reads the introduction to identify promises and forward-looking claims, then checks whether each promise is fulfilled in the body and conclusion. Each promise receives a pass, fail, or partial verdict with supporting evidence.
 
 <h3><img src="docs/images/cut-by-20.png" alt="Cut by 20%. Trim the fat without losing meaning."></h3>
 
 Answers the question: _can this be shorter without losing anything important?_
 
-This AI-powered tool sends your document to an LLM with a single directive: cut approximately 20% of the word count while preserving technical accuracy and meaning. If you have a target audience configured, the model factors that in when deciding what to trim -- it won't cut context that your readers need.
-
-The result shows original and edited word counts with the reduction percentage, followed by a list of individual edit chunks. Each chunk displays the original text (struck through, red) alongside the condensed replacement (green), with a brief reason for the cut. You review each suggestion independently -- Accept applies the edit to your document immediately, Reject keeps the original, and Highlight scrolls to the relevant passage in the editor. Requires an AI API key.
-
-## Running locally
-
-Most tools (Readability, Style Check, Pronouns, Header Shift, List Consistency, Acronyms, Hedges) run entirely in the browser with no backend. The AI-powered features (audience assessment, style fixes, parallel structure fixes, promise tracking, cut by 20%) route through a Netlify Functions proxy at `netlify/functions/ai-proxy.mts`, so you need to use the Netlify CLI to run the dev server:
-
-```
-npm install
-netlify dev
-```
-
-This starts both the Vite frontend and the Netlify Functions server. The proxy accepts requests at `/api/ai` and forwards them to your configured AI provider (OpenAI, Anthropic, or Google). API keys are entered in the settings modal and stored in your browser's local storage -- they are sent per-request to the proxy and are never stored server-side.
-
-If you only need the non-AI tools, `npx vite` works fine -- the AI buttons simply won't appear unless you configure a key.
-
-### Using Ollama (local models)
-
-If you'd rather run AI features against a local model instead of a cloud API, you can use [Ollama](https://ollama.com):
-
-1. [Install Ollama](https://ollama.com/download) and pull a model (e.g. `ollama pull llama3.1:8b`).
-2. Make sure Ollama is running (`ollama serve` or the desktop app).
-3. In Wordsworth's settings modal, click the **Ollama** provider button.
-4. Enter the model name as shown by `ollama list` (e.g. `llama3.1:8b`).
-5. The base URL defaults to `http://localhost:11434` -- change it if Ollama is running on a different host or port.
-
-No API key is needed. Ollama requests go directly from your browser to the local Ollama server, bypassing the Netlify proxy entirely. Smaller models may produce lower-quality results for complex tasks like promise tracking, but work well for style fixes and audience assessment.
-
-> **Note:** On the hosted version of Wordsworth, Ollama is disabled since it requires a local server. To use Ollama, clone the repo and run locally with `netlify dev`. If you're deploying your own instance, set the `VITE_DISABLE_OLLAMA` environment variable to `true` in your Netlify dashboard to show a "run locally" message instead of the Ollama configuration inputs.
+AI-powered: sends the document to an LLM with the directive to cut approximately 20% of the word count while preserving technical accuracy and meaning. If a target audience is configured, the model factors that in when deciding what to trim. Presents individual edit suggestions with original text crossed out alongside the condensed replacement.
