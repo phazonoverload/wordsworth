@@ -1,5 +1,8 @@
 <h1><img src="docs/images/main.png" alt="Wordsworth. Microtools for technical writers."></h1>
 
+> [!TIP]
+> **Use as an agent skill:** `npx skills add phazonoverload/wordsworth`
+
 Wordsworth is a browser-based writing workbench for people who write technical content. Paste your Markdown into the editor, pick a tool, and get instant feedback on readability, style, and more.
 
 Most tools run entirely in the browser with no account or API key required. AI-powered features (audience assessment, style fixes) are bring-your-own-key -- enter an OpenAI, Anthropic, or Google API key in settings and requests go directly through a lightweight proxy. You can also use [Ollama](https://ollama.com) to run models locally with no API key or cloud account required. Nothing is stored server-side.
